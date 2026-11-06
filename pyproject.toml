@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netadapt-iot"
+version = "0.1.0"
+description = "Reproducible mixed-IoT gateway scheduling research prototype"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "matplotlib>=3.8"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+hardware = ["pyserial>=3.5", "platformio>=6"]
+research = ["requests>=2.31", "pypdf>=5"]
+
+[project.scripts]
+netadapt = "netadapt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

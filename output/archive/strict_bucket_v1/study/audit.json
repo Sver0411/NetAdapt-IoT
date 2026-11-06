@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "audited_runs": 3900,
+  "common_trace_groups": 300,
+  "deterministic_replays": [
+    "normal",
+    "congestion",
+    "markov_link",
+    "mixed_sizes",
+    "nodes_96"
+  ],
+  "source_hash_verified": true,
+  "cohort_event_censoring": 0,
+  "hardware_measurements": 0
+}

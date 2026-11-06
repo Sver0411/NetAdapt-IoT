@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "audited_runs": 3900,
+  "common_trace_groups": 300,
+  "deterministic_replays": [
+    "normal",
+    "congestion",
+    "markov_link",
+    "mixed_sizes",
+    "nodes_96"
+  ],
+  "source_hash_verified": true,
+  "cohort_event_censoring": 0,
+  "hardware_measurements": 0,
+  "source_verification": "documented_presentation_revision",
+  "experiment_source_hash": "0dafe0629c25ad4e94dcdccf511ea9df5e90f9f76df35eab6f515a75e27c9f3a",
+  "current_source_hash": "948568cfd40d420559a589c37b0e72839d28895bdd0873114b746671f6d2bc5b"
+}

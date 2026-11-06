@@ -1,0 +1,72 @@
+{
+  "study": {
+    "seeds": [
+      0,
+      1
+    ],
+    "policies": [
+      "fifo",
+      "rr",
+      "wrr",
+      "edf",
+      "priority",
+      "maxweight",
+      "pf",
+      "aoi_gain",
+      "debt",
+      "fud",
+      "fud_no_age",
+      "fud_no_urgency",
+      "fud_no_debt"
+    ],
+    "scenarios": [
+      {
+        "name": "normal",
+        "nodes": 24,
+        "slots": 400,
+        "warmup": 50,
+        "dt": 0.1,
+        "rate": 0.015,
+        "duty": 0.8,
+        "success": 0.95,
+        "delay": 1,
+        "link": "iid",
+        "burst": false,
+        "unequal_rates": false,
+        "equal_weights": false,
+        "mixed_sizes": false,
+        "bitrate": 6400,
+        "header": 16,
+        "event_buffer": 32
+      },
+      {
+        "name": "congestion",
+        "nodes": 24,
+        "slots": 400,
+        "warmup": 50,
+        "dt": 0.1,
+        "rate": 0.1,
+        "duty": 0.8,
+        "success": 0.95,
+        "delay": 1,
+        "link": "iid",
+        "burst": false,
+        "unequal_rates": false,
+        "equal_weights": false,
+        "mixed_sizes": false,
+        "bitrate": 6400,
+        "header": 16,
+        "event_buffer": 32
+      }
+    ]
+  },
+  "code_hash": "71ca41cf64e1cd7a7421148b6efaa3310a7306637d13107d1f02c6060c2229b0",
+  "python": "3.14.7",
+  "platform": "macOS-15.7.7-arm64-arm-64bit-Mach-O",
+  "dependencies": {
+    "numpy": "2.5.4",
+    "matplotlib": "3.11.2"
+  },
+  "started_utc": "2026-11-06T11:37:45.047112+00:00",
+  "measurement_type": "synthetic_slotted_simulation"
+}
