@@ -13,6 +13,7 @@ from .model import Config
 from .scheduler import POLICIES
 from .simulation import simulate
 from .traffic import generate
+from .metrics import METRIC_VERSION
 
 
 def code_hash():
@@ -29,7 +30,7 @@ def work(args):
         path=Path(root)/'runs'/c.name/str(seed)/policy
         if path.exists():
             r=json.loads((path/'metrics.json').read_text())
-            if r['trace_hash']!=trace.digest or r['config_hash']!=c.digest():
+            if r['trace_hash']!=trace.digest or r['config_hash']!=c.digest() or r['metric_version']!=METRIC_VERSION:
                 raise ValueError(f'resume hash mismatch: {path}')
         else:r=simulate(c,trace,policy,seed,path)
         rows.append(r)
@@ -46,7 +47,7 @@ def run_study(study,output,workers=4):
     if len(set(names))!=len(names):raise ValueError('scenario names must be unique')
     seeds=study['seeds']
     if not seeds or len(set(seeds))!=len(seeds):raise ValueError('unique nonempty seeds required')
-    manifest=dict(study={**study,'scenarios':configs},code_hash=code_hash(),
+    manifest=dict(study={**study,'scenarios':configs},code_hash=code_hash(),metric_version=METRIC_VERSION,
         python=platform.python_version(),platform=platform.platform(),
         dependencies={x:importlib.metadata.version(x) for x in ['numpy','matplotlib']},
         started_utc=datetime.now(timezone.utc).isoformat(),measurement_type='synthetic_slotted_simulation')

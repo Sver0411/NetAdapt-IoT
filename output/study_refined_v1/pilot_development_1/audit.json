@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "metric_version": 2,
+  "audited_runs": 78,
+  "audited_packets": 27079,
+  "common_trace_groups": 6,
+  "pending_at_terminal_cutoff": 0,
+  "source_hash": "9420d4e9d0abe7395db2dfc26a3874b3d908a0b6347b0541c3fa5c13b14cf5f1",
+  "independent_checks": [
+    "raw packet identities and final outcomes",
+    "class-specific denominators and latency",
+    "token bucket and server intervals",
+    "main/tail resource overlap",
+    "AoI and QoS interval integration",
+    "common potential channel results"
+  ],
+  "deterministic_replays": [
+    {
+      "scenario": "total_036_nodes_8",
+      "policy": "fud",
+      "seed": 0
+    },
+    {
+      "scenario": "total_036_nodes_8",
+      "policy": "pf",
+      "seed": 0
+    }
+  ],
+  "hardware_measurements": 0
+}

@@ -15,7 +15,15 @@ from protocol import send_command,parse_ack
 from netadapt.model import Config,flows_for
 from netadapt.traffic import generate
 from netadapt.queues import Queues
-from netadapt.scheduler import Scheduler,POLICIES
+from netadapt.scheduler import Scheduler,POLICIES,pf_update
+
+
+def pf_slot(throughput,t,feedback):
+    """Quantize host ACK completion to the next logical slot boundary."""
+    ack_bytes=np.zeros(len(throughput))
+    for at,flow,size in feedback:
+        if at==t:ack_bytes[flow]+=size
+    return pf_update(throughput,ack_bytes)
 
 
 def connect(port):
@@ -59,7 +67,7 @@ def run(args):
         fs=flows_for(c);q=Queues(fs,c.event_buffer);sched=Scheduler(args.policy,fs);trace=generate(c,args.seed)
         last=np.zeros(c.nodes);prob=np.full(c.nodes,.8);debt=np.zeros(c.nodes);tp=np.ones(c.nodes)
         targets=np.array([.5*c.duty*.8*f.weight/(sum(x.weight for x in fs)*f.service) for f in fs])
-        next_slot=0;prev_t=0.;tokens=0.;cap=c.bucket_slots
+        next_slot=0;prev_t=0.;tokens=0.;cap=c.bucket_slots;pf_feedback=[]
         start=time.monotonic();ledger={}
         with (out/'raw_serial.jsonl').open('w') as raw:
             while True:
@@ -67,6 +75,8 @@ def run(args):
                 tokens=min(cap,tokens+(now-prev_t)*c.duty);prev_t=now
                 if t>=c.slots:break
                 while next_slot<=t:
+                    tp=pf_slot(tp,next_slot,pf_feedback)
+                    pf_feedback=[ack for ack in pf_feedback if ack[0]>next_slot]
                     for p in trace.arrivals[next_slot]:
                         ledger[p.id]={**asdict(p),'status':'queued'}
                         for old,status in q.admit(p):ledger[old.id]['status']=status
@@ -87,7 +97,7 @@ def run(args):
                 if ok:
                     last[p.flow]=max(last[p.flow],p.generated)
                     if timely:debt[p.flow]=max(0,debt[p.flow]-1)
-                tp*=.99;tp[p.flow]+=.01*p.size*int(ok)
+                if ok:pf_feedback.append((math.ceil(arrival),p.flow,p.size))
         (out/'packets.json').write_text(json.dumps(list(ledger.values()),indent=2))
         sent=[r for r in ledger.values() if 'sent_slot' in r]
         # ACK timeout is recorded as an unconfirmed transaction.

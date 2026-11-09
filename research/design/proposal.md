@@ -4,13 +4,15 @@
 
 多个 IoT 逻辑设备共享受限出口时，如何联合信息时效、事件截止期与服务欠账安排发送顺序？
 
-## 实验假设
+## 研究假设
 
-- H1：在拥塞与突发场景中，FUD 相对 FIFO 同时降低状态平均 AoI 与事件 miss。
-- H2：相对 AoI-gain，FUD 改善事件 miss 或需求归一化公平性，并记录 AoI 变化。
-- H3：服务欠账项改变每流交付率与公平性，分量消融用于评估其贡献。
+- H1：相对 FIFO、EDF、MaxWeight、PF 和 AoI-gain，FUD 的事件及时交付如何变化？
+- H2：事件截止期改善对应怎样的状态 AoI 变化？
+- H3：相对 fud_no_debt，欠账机制能否提高原始及权重归一化 Service Share Jain？
+- H4：固定每节点速率和固定总速率两种规模设计中，FUD 的表现如何变化？
+- H5：桶容量、预算、服务率、链路与离散化条件如何影响上述比较？
 
-参数依据量纲、归一化和机制覆盖选定。FUD 三个系数为 1、1、0.25。开发检查使用 seeds 0、1，评估使用 100–119；后续方法版本使用单独的配置与评估记录。
+FUD 系数为 1、1、0.25。开发 seeds 0、1，正式 seeds 100–119。第一轮精修固定核心公式和欠账更新，新增分类指标、公共尾窗、负载控制和单因素实验。
 
 ## 网络模型
 
@@ -72,15 +74,17 @@ MaxWeight 使用 p_hat×queue_bytes/s；PF 使用预期 payload 服务率与 EWM
 
 三个消融分别去除 G、U、D。各方法共享输入轨迹、队列策略、预算和反馈时序。
 
-## 指标定义
+## 指标定义与版本
 
-状态 AoI 在 warmup 后逐 slot 计算 (t−u_i)×dt，按流求时间平均，并报告按目标 tau 归一化的数值。初始 u_i=0。
+主期为 `[0,T)`，稳态观察为 `[warmup,T)`，公共尾窗停止新到达并判定剩余结果。状态 AoI 与实际服务资源占用仅在主观察窗口计算，v2 生成 cohort 覆盖主观察窗口并追踪至尾窗结束。主截止点快照与最终终态分别记录。
 
-事件 cohort 为 warmup≤g<T−guard，其中 guard=max(deadline)+max(s)+delay。miss=1−及时成功数/事件生成数；overflow、expired、link_loss 等结局分别记录。PDR 使用相同生成 cohort。
+状态业务报告 Mean/Normalized AoI、替换率、已判定尝试成功率、Goodput；事件报告 deadline success/miss、late、overflow、expiration 和交付时延/P95。pending 作为结束删失单列。
 
-Latency/P95 统计成功交付 cohort 包。cohort_goodput_bps 按 cohort 生成窗口归一化，observation_goodput_bps 按观察窗口实际到达字节统计。队列长度与利用率逐 slot 汇总。
+资源公平性使用主观察窗口内每流实际消耗的抽象服务 slots，含失败尝试；报告 Jain(S)、Jain(S/weight)、每流 share、Goodput 与业务 QoS。状态 QoS 为 AoI 达标时间比例；事件 QoS 为及时交付比例。
 
-Jain 指数同时计算每流交付数与每流 PDR；纳入至少生成一个 cohort 包的流，全零向量定义为 0。通信成本记录 payload 与抽象 wire bytes。
+数学定义、分母及 legacy v1 字段见 [指标文档](../../docs/metrics-v2.md)。规模 A 固定每流速率；规模 B 固定总速率和三类业务负载份额。完整设计见 [实验协议](../experiments/protocol.md)。
+
+PF 初始化每流 1 byte/slot，逐逻辑 slot 更新 `throughput=0.99*throughput+0.01*成功 ACK payload bytes`。失败及无 ACK slot 的字节数为零；物理重放 ACK 完成时刻向上取整到逻辑边界。FUD 的 Y_i 仍为及时 event / 新鲜 state 包数。
 
 ## 模型与后续实验
 

@@ -4,6 +4,18 @@ import math
 POLICIES=('fifo','rr','wrr','edf','priority','maxweight','pf','aoi_gain','debt',
           'fud','fud_no_age','fud_no_urgency','fud_no_debt')
 
+PF_ALPHA=0.01
+
+
+def pf_update(throughput,ack_bytes,slots=1):
+    """Advance logical slots; ACK bytes belong to the final slot boundary.
+
+    Initial throughput is one byte/slot for every flow. Intermediate slots
+    have zero ACK bytes. Failed transactions contribute zero bytes.
+    """
+    if slots < 1:raise ValueError('PF update must advance at least one slot')
+    return (1-PF_ALPHA)**slots*throughput+PF_ALPHA*ack_bytes
+
 
 class Scheduler:
     def __init__(self,name,flows):

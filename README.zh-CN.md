@@ -1,6 +1,6 @@
 <h1 align="center">NetAdapt-IoT</h1>
 
-<p align="center"><strong>面向多业务物联网网络的自适应资源调度研究</strong></p>
+<p align="center"><strong>面向多业务 IoT 共享网关出口的自适应调度研究</strong></p>
 
 <p align="center">信息年龄 AoI · 截止期感知调度 · 公平资源分配</p>
 
@@ -21,7 +21,7 @@
 
 NetAdapt-IoT 是一个面向多业务 IoT 网络的资源调度研究平台，研究多个设备共享有限通信出口时，如何在状态更新的新鲜度、事件截止期和设备服务公平性之间分配资源。
 
-项目包含 Python 离散时隙网络仿真器、九种基线调度方法、Freshness–Urgency–Debt（FUD）组合策略、三种机制消融和自动化实验流程。当前软件评估覆盖 **15 个场景、20 个种子和 3,900 次运行**，保存逐包记录、配对统计和对比图表。ESP32-S3/E220 双端固件及 PC 重放工具用于下一阶段的单链路实验。
+项目包含 Python 离散时隙模型、九种基线调度、Freshness–Urgency–Debt（FUD）策略、三种机制消融和自动实验流程。精修版完成 **48 条命名条件、20 个种子、13 种策略，共 12,480 次运行**：主实验 15 条、固定总负载规模组 4 条、模型敏感性 25 条、高负载桶容量 4 条。保存逐包结局、分类交付指标、实际服务份额和配对区间。ESP32-S3/E220 固件及 PC 重放工具用于下一阶段的物理链路实验。
 
 <a id="research-question-and-method"></a>
 
@@ -69,34 +69,34 @@ flowchart LR
 
 15 个场景覆盖正常负载、拥塞、8/24/48/96 个逻辑设备、异构产生率、等优先级、弱链路、Markov 损失、突发、预算变化、反馈延迟、异包长和无损服务。
 
-评价指标包括状态 AoI、事件截止期 miss、包交付率、平均/P95 时延、有效吞吐、队列长度、服务利用率，以及按每流交付率计算的 Jain 公平性。完整定义与参数见[实验协议](research/experiments/protocol.md)和[实验配置](configs/study.json)。
+评价体系分别报告状态 AoI、替换率和发送成功率，以及事件及时交付、溢出和过期。资源公平性采用实际占用的抽象服务 slots，并给出等份和权重比例参考。各方法共享主窗口与停止到达后的公共尾窗，主截止点快照与最终结局分别记录。数学定义和控制条件见[指标文档](docs/metrics-v2.md)、[实验协议](research/experiments/protocol.md)与[冻结配置](configs/refined_v1/)。
 
 <a id="key-findings"></a>
 
-## 主要发现：软件评估
+## 主要发现：精修版软件评估
 
-最终矩阵包含 **15 场景 × 20 个种子（100–119）× 13 方法 = 3,900 次仿真**。每次运行 4,000 slots，预热阶段为 500 slots。事件指标采用预留尾部窗口的生成 cohort，置信区间按配对种子差值重采样。
+主实验 3,900 次、固定总负载组 1,040 次、敏感性组 6,500 次、高负载桶容量组 1,040 次；每条条件均使用 seeds 100–119 和全部 13 种方法。敏感性各组保留自己的基准水平，重复基准在组内分析。状态 AoI 与 Service Share 仅统计主观察窗口，事件结局追踪至公共尾窗结束。
 
-| 场景 | 方法 | 状态平均 AoI（s）↓ | 事件截止期 miss（%）↓ | Jain(PDR) ↑ |
+| 场景 | 方法 | 状态平均 AoI(s) ↓ | 事件 miss(%) ↓ | Jain Service Share ↑ |
 | --- | --- | ---: | ---: | ---: |
-| 拥塞 | FIFO | 2.2841 | 96.42 | 0.7140 |
-| 拥塞 | AoI-gain | 4.8532 | 47.33 | 0.7449 |
-| 拥塞 | FUD | 3.5046 | 63.18 | 0.8184 |
-| 突发 | FIFO | 5.5966 | 33.96 | 0.9851 |
-| 突发 | AoI-gain | 5.6617 | 13.85 | 0.9861 |
-| 突发 | FUD | 5.5926 | 18.15 | 0.9882 |
+| 拥塞 | FIFO | 2.2841 | 96.42 | 0.7159 |
+| 拥塞 | AoI-gain | 4.8532 | 47.31 | 0.7441 |
+| 拥塞 | FUD | 3.5046 | 63.15 | 0.8187 |
+| 突发 | FIFO | 5.5966 | 33.91 | 0.9751 |
+| 突发 | AoI-gain | 5.6617 | 13.83 | 0.9808 |
+| 突发 | FUD | 5.5926 | 18.13 | 0.9818 |
 
-**拥塞场景：** 相比 FIFO，FUD 的事件 miss 降低 33.24 个百分点，状态 AoI 增加 1.22049 s。相比 AoI-gain，FUD 的状态 AoI 更低、Jain(PDR) 更高，同时有更多事件超过截止期。
+**拥塞：** FUD−FIFO 的事件 miss 差为 -33.27238 [-33.59573, -32.98051] 个百分点，状态 AoI 差为 +1.22049 [+1.20904, +1.23202] s（95% 配对 bootstrap CI）。相对 AoI-gain，FUD 的事件 miss 更高、状态 AoI 更低。
 
-**突发流量：** 相比 FIFO，FUD 的事件 miss 降低 15.81 个百分点。AoI 配对差值为 −0.00394 s，95% 配对 bootstrap 区间为 `[−0.03330, +0.02285]` s。
+**欠账消融：** 拥塞下 Service Share Jain 的变化为 +0.00052 [-0.00074, +0.00171]，区间跨零，该条件的资源公平性提升尚无明确方向。
 
-**机制消融：** 加入欠账项后，拥塞场景的 Jain(PDR) 变化约为 +0.00196，突发场景约为 −0.00010，体现了该机制对负载条件的依赖。
+**规模与模型控制：** A 组固定每流速率，B 组在 8/24/48/96 条流之间保持总负载和分类到达相同；桶容量 2/4/8/16 与其余七组参数检验适用条件。[A–K 报告](research/REPORT.md)给出五项研究问题、完整比较区间及有利和不利结果。
 
-![各仿真场景中的调度策略比较](output/study/overview.png)
+![状态时效、事件截止期与服务资源分配](output/study_refined_v1/overview.png)
 
-![信息时效、紧迫度与服务欠账消融](output/study/ablations.png)
+![FUD 分量消融](output/study_refined_v1/ablations.png)
 
-图表展示不同负载下信息时效、及时交付和公平性的变化。全部 13 种方法保存在[统计汇总](output/study/summary.csv)、[配对比较](output/study/paired_differences.csv)和[每流结果](output/study/per_flow.csv)中。[结果报告](output/study/results.md)与[负面结果表](output/study/negative_results.csv)保留完整比较。
+完整数据：[汇总](output/study_refined_v1/summary.csv) · [配对比较](output/study_refined_v1/paired_differences.csv) · [每流指标](output/study_refined_v1/per_flow.csv) · [不利方向](output/study_refined_v1/negative_results.csv) · [固定总负载](output/study_refined_v1/scaling/results.md) · [敏感性](output/study_refined_v1/sensitivity/results.md) · [高负载桶容量](output/study_refined_v1/bucket_load/results.md)。历史 v1 数据保留在 [output/study](output/study/results.md)。
 
 <a id="implementation-status"></a>
 
@@ -104,16 +104,16 @@ flowchart LR
 
 | 模块 | 进展 |
 | --- | --- |
-| 流量生成、队列、信道模型与 13 种调度方法 | 已实现，通过软件测试 |
-| 自动化实验运行与统计分析 | 完成 3,900 次运行，执行失败数为 0 |
-| Python 单元与集成检查 | 34 项测试通过 |
-| 数据审计 | 检查 3,900 次运行，验证 300 组共享轨迹 |
-| 确定性重放 | 五个代表场景的 FUD 指标逐字段复现 |
-| PC 串口协议与逻辑流重放 | 已实现，模拟串口测试通过 |
-| ESP32-S3 N16R8 发送端与接收端固件 | 两种角色均通过 PlatformIO 构建 |
-| 物理单链路校准与实验 | 下一阶段 |
+| 混合业务队列、公共尾窗、13 种策略 | 已实现；FUD 评分保持一致 |
+| 精修版软件实验 | 12,480 次完成，0 次执行失败 |
+| Python 单元与集成检查 | 48 项测试通过 |
+| 原始日志独立审计 | 12,480 次包账本、资源、AoI、QoS 检查通过 |
+| 发布基线保留 | 40,111 个历史文件原样保留；100 次 FUD 主窗口运行一致 |
+| PF 仿真与重放 | 共用 slot EWMA，模拟 ACK 时序测试通过 |
+| ESP32-S3 N16R8 固件 | 双端构建成功；QIO/OPI SDK 与 16 MB 镜像头核对通过 |
+| 物理标定、无线实验与电流采集 | 下一阶段 |
 
-硬件路径使用两块 ESP32-S3 和两块 E220-400T22S。PC 将逻辑流调度到发送端，接收端校验带 CRC 的帧并回复 ACK。[硬件指南](hardware/README.md)提供接线与采集命令，[验证记录](docs/validation/status.md)汇总构建日志和软件检查。
+硬件路径使用两块 ESP32-S3 和两套 E220-400T22S，PC 安排逻辑流发送顺序，接收端校验 CRC 并返回 ACK。接线与运行见[硬件指南](hardware/README.md)，构建与软件证据见[验证记录](docs/validation/status.md)。
 
 <a id="quick-start"></a>
 
@@ -128,30 +128,32 @@ python -m pip install -e '.[dev,hardware]'
 python -m pytest -q
 ```
 
-运行包含 52 次仿真的软件示例，并生成报告：
+运行包含 78 次仿真的软件示例，并生成报告：
 
 ```bash
-python run.py run --config configs/pilot.json --out output/quickstart --workers 2
+python run.py run --config configs/refined_v1/pilot.json --out output/quickstart --workers 2
 python run.py analyze --out output/quickstart
 ```
 
-运行完整实验矩阵：
+运行主实验矩阵：
 
 ```bash
-python run.py run --config configs/study.json --out output/reproduction --workers 4
+python run.py run --config configs/refined_v1/main.json --out output/reproduction --workers 4
 python run.py analyze --out output/reproduction
 ```
+
+固定总负载和敏感性的完整命令见[复现指南](docs/reproducibility.md)。
 
 每个新实验使用新输出目录；源码 hash 与配置一致时，可恢复已有实验。`hardware` extra 包含串口协议测试依赖和 PlatformIO。
 
 审计复现生成的数据，或构建固件：
 
 ```bash
-python scripts/audit_study.py output/reproduction
+python scripts/audit_refined.py output/reproduction
 pio run -d hardware/firmware
 ```
 
-每次运行保存配置、种子、源码/轨迹 hash、逐包结局和调度决策。分析生成 CSV 汇总、配对 bootstrap 区间、PNG 图表和 Markdown 报告。环境信息记录在[requirements-lock.txt](requirements-lock.txt)和实验 [manifest](output/study/manifest.json)中。
+每次运行保存配置、种子、源码/轨迹 hash、逐包结局和调度决策。分析生成 CSV 汇总、配对 bootstrap 区间、PNG 图表和 Markdown 报告。环境信息记录在[requirements-lock.txt](requirements-lock.txt)和实验 [manifest](output/study_refined_v1/manifest.json)中。
 
 仓库包含实验汇总、每流统计、报告和图表。逐包日志与历史源码快照保存在本地输出目录，运行上述配置可重新生成逐包记录。
 
@@ -171,10 +173,10 @@ NetAdapt-IoT 聚焦网络级服务顺序，固定源端产生行为，研究多�
 | 主题 | 文档 |
 | --- | --- |
 | 方法与数学定义 | [研究方案](research/design/proposal.md) |
-| 实验设计 | [实验协议](research/experiments/protocol.md) · [配置](configs/study.json) |
+| 实验设计 | [实验协议](research/experiments/protocol.md) · [配置](configs/refined_v1/main.json) |
 | 软件结构 | [架构说明](docs/architecture.md) |
-| 结果与数据 | [结果报告](output/study/results.md) · [统计 CSV](output/study/summary.csv) |
-| 复现与审计 | [复现指南](docs/reproducibility.md) · [审计记录](output/study/audit.json) |
+| 结果与数据 | [结果报告](output/study_refined_v1/results.md) · [统计 CSV](output/study_refined_v1/summary.csv) |
+| 复现与审计 | [复现指南](docs/reproducibility.md) · [审计记录](output/study_refined_v1/audit.json) |
 | 硬件与开发 | [硬件指南](hardware/README.md) · [路线图](docs/roadmap.md) |
 
 下一阶段的开发重点：

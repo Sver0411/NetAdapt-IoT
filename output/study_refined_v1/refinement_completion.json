@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "metric_version": 2,
+  "formal_runs": 12480,
+  "families": [
+    {
+      "family": "main",
+      "runs": 3900,
+      "audited_packets": 9308650,
+      "replays": 10
+    },
+    {
+      "family": "scaling",
+      "runs": 1040,
+      "audited_packets": 1501032,
+      "replays": 2
+    },
+    {
+      "family": "sensitivity",
+      "runs": 6500,
+      "audited_packets": 12215996,
+      "replays": 4
+    },
+    {
+      "family": "bucket_load",
+      "runs": 1040,
+      "audited_packets": 10047128,
+      "replays": 4
+    }
+  ],
+  "python_tests": 48,
+  "firmware_roles": [
+    "sender",
+    "receiver"
+  ],
+  "physical_experiments": 0,
+  "internal_document_links": "PASS"
+}

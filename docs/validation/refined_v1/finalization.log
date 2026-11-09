@@ -1,0 +1,8 @@
+{'status': 'PASS', 'historical_files_unchanged': 40111, 'fud_main_replays_compared': 100}
+scaling controls 2080
+output/study_refined_v1/sensitivity 1326
+output/study_refined_v1/bucket_load 234
+research/REPORT.md
+bilingual README files updated
+48 tests, 12480 refined runs, 33072806 packets, 20 replays
+{'status': 'PASS', 'metric_version': 2, 'formal_runs': 12480, 'families': [{'family': 'main', 'runs': 3900, 'audited_packets': 9308650, 'replays': 10}, {'family': 'scaling', 'runs': 1040, 'audited_packets': 1501032, 'replays': 2}, {'family': 'sensitivity', 'runs': 6500, 'audited_packets': 12215996, 'replays': 4}, {'family': 'bucket_load', 'runs': 1040, 'audited_packets': 10047128, 'replays': 4}], 'python_tests': 48, 'firmware_roles': ['sender', 'receiver'], 'physical_experiments': 0, 'internal_document_links': 'PASS'}

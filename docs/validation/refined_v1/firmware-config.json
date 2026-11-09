@@ -1,0 +1,36 @@
+{
+  "board": "esp32-s3-n16r8",
+  "expected_module": "N16R8",
+  "flash_mb": 16,
+  "flash_mode": "qio",
+  "psram_interface": "opi",
+  "psram_expected_mb": 8,
+  "psram_size_configuration": "runtime detection (CONFIG_SPIRAM_SIZE=-1)",
+  "sdk_qio_opi_used": true,
+  "sdk_oct_psram": true,
+  "usb_cdc": true,
+  "usb_mode": true,
+  "board_has_psram": true,
+  "pins": {
+    "RADIO_RX": 17,
+    "RADIO_TX": 18,
+    "M0": 4,
+    "M1": 5,
+    "AUX": 6
+  },
+  "uart": "UART1 9600 8N1",
+  "usb_serial": 115200,
+  "binaries": {
+    "sender": {
+      "sha256": "c4801afa6b5ca6795fd4a5d54ba1ef776d178be1f17232938c51e18a0b0bb8de",
+      "size_bytes": 288752,
+      "flash_header_size_code": 4
+    },
+    "receiver": {
+      "sha256": "6dc732c0dcca7558dc13883a2c64a72cccd47309fc7b008c454558cd51fe88b1",
+      "size_bytes": 288160,
+      "flash_header_size_code": 4
+    }
+  },
+  "physical_memory_readout_performed": false
+}

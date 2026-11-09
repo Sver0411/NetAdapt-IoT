@@ -1,0 +1,147 @@
+RUN main
+10/300 scenario-seeds; 130 runs; 15.1s
+20/300 scenario-seeds; 260 runs; 22.4s
+30/300 scenario-seeds; 390 runs; 44.9s
+40/300 scenario-seeds; 520 runs; 60.5s
+50/300 scenario-seeds; 650 runs; 65.7s
+60/300 scenario-seeds; 780 runs; 70.2s
+70/300 scenario-seeds; 910 runs; 83.4s
+80/300 scenario-seeds; 1040 runs; 98.3s
+90/300 scenario-seeds; 1170 runs; 120.1s
+100/300 scenario-seeds; 1300 runs; 141.8s
+110/300 scenario-seeds; 1430 runs; 149.9s
+120/300 scenario-seeds; 1560 runs; 158.7s
+130/300 scenario-seeds; 1690 runs; 167.6s
+140/300 scenario-seeds; 1820 runs; 174.9s
+150/300 scenario-seeds; 1950 runs; 185.9s
+160/300 scenario-seeds; 2080 runs; 192.5s
+170/300 scenario-seeds; 2210 runs; 198.4s
+180/300 scenario-seeds; 2340 runs; 206.2s
+190/300 scenario-seeds; 2470 runs; 214.8s
+200/300 scenario-seeds; 2600 runs; 222.5s
+210/300 scenario-seeds; 2730 runs; 229.6s
+220/300 scenario-seeds; 2860 runs; 237.0s
+230/300 scenario-seeds; 2990 runs; 244.3s
+240/300 scenario-seeds; 3120 runs; 251.3s
+250/300 scenario-seeds; 3250 runs; 257.6s
+260/300 scenario-seeds; 3380 runs; 264.5s
+270/300 scenario-seeds; 3510 runs; 271.1s
+280/300 scenario-seeds; 3640 runs; 277.6s
+290/300 scenario-seeds; 3770 runs; 284.0s
+300/300 scenario-seeds; 3900 runs; 293.7s
+RUN scaling
+10/80 scenario-seeds; 130 runs; 7.2s
+20/80 scenario-seeds; 260 runs; 13.8s
+30/80 scenario-seeds; 390 runs; 18.8s
+40/80 scenario-seeds; 520 runs; 26.8s
+50/80 scenario-seeds; 650 runs; 37.7s
+60/80 scenario-seeds; 780 runs; 46.3s
+70/80 scenario-seeds; 910 runs; 59.2s
+80/80 scenario-seeds; 1040 runs; 70.5s
+RUN sensitivity
+10/500 scenario-seeds; 130 runs; 8.3s
+20/500 scenario-seeds; 260 runs; 16.2s
+30/500 scenario-seeds; 390 runs; 20.4s
+40/500 scenario-seeds; 520 runs; 28.6s
+50/500 scenario-seeds; 650 runs; 36.3s
+60/500 scenario-seeds; 780 runs; 41.2s
+70/500 scenario-seeds; 910 runs; 49.3s
+80/500 scenario-seeds; 1040 runs; 58.1s
+90/500 scenario-seeds; 1170 runs; 62.9s
+100/500 scenario-seeds; 1300 runs; 72.3s
+110/500 scenario-seeds; 1430 runs; 80.3s
+120/500 scenario-seeds; 1560 runs; 85.4s
+130/500 scenario-seeds; 1690 runs; 92.5s
+140/500 scenario-seeds; 1820 runs; 100.9s
+150/500 scenario-seeds; 1950 runs; 109.2s
+160/500 scenario-seeds; 2080 runs; 118.8s
+170/500 scenario-seeds; 2210 runs; 126.1s
+180/500 scenario-seeds; 2340 runs; 131.4s
+190/500 scenario-seeds; 2470 runs; 139.5s
+200/500 scenario-seeds; 2600 runs; 147.4s
+210/500 scenario-seeds; 2730 runs; 153.2s
+220/500 scenario-seeds; 2860 runs; 162.3s
+230/500 scenario-seeds; 2990 runs; 170.3s
+240/500 scenario-seeds; 3120 runs; 175.7s
+250/500 scenario-seeds; 3250 runs; 185.5s
+260/500 scenario-seeds; 3380 runs; 194.1s
+270/500 scenario-seeds; 3510 runs; 199.6s
+280/500 scenario-seeds; 3640 runs; 209.2s
+290/500 scenario-seeds; 3770 runs; 218.7s
+300/500 scenario-seeds; 3900 runs; 225.1s
+310/500 scenario-seeds; 4030 runs; 236.5s
+320/500 scenario-seeds; 4160 runs; 247.0s
+330/500 scenario-seeds; 4290 runs; 254.5s
+340/500 scenario-seeds; 4420 runs; 262.4s
+350/500 scenario-seeds; 4550 runs; 269.4s
+360/500 scenario-seeds; 4680 runs; 275.3s
+370/500 scenario-seeds; 4810 runs; 283.6s
+380/500 scenario-seeds; 4940 runs; 295.5s
+390/500 scenario-seeds; 5070 runs; 302.8s
+400/500 scenario-seeds; 5200 runs; 312.0s
+410/500 scenario-seeds; 5330 runs; 325.1s
+420/500 scenario-seeds; 5460 runs; 337.8s
+430/500 scenario-seeds; 5590 runs; 364.2s
+440/500 scenario-seeds; 5720 runs; 394.5s
+450/500 scenario-seeds; 5850 runs; 422.8s
+460/500 scenario-seeds; 5980 runs; 448.0s
+470/500 scenario-seeds; 6110 runs; 463.8s
+480/500 scenario-seeds; 6240 runs; 472.4s
+490/500 scenario-seeds; 6370 runs; 478.4s
+500/500 scenario-seeds; 6500 runs; 484.3s
+ANALYZE main
+{'runs': 3900, 'negative_comparisons': 1545}
+ANALYZE scaling
+{'runs': 1040, 'negative_comparisons': 417}
+ANALYZE sensitivity
+{'runs': 6500, 'negative_comparisons': 2344}
+AUDIT main
+audited normal: 260 runs
+audited congestion: 520 runs
+audited nodes_8: 780 runs
+audited nodes_48: 1040 runs
+audited nodes_96: 1300 runs
+audited unequal_rates: 1560 runs
+audited equal_weights: 1820 runs
+audited weak_link: 2080 runs
+audited markov_link: 2340 runs
+audited bursty: 2600 runs
+audited budget_40: 2860 runs
+audited budget_100: 3120 runs
+audited long_delay: 3380 runs
+audited mixed_sizes: 3640 runs
+audited lossless: 3900 runs
+{'status': 'PASS', 'metric_version': 2, 'audited_runs': 3900, 'audited_packets': 9308650, 'common_trace_groups': 300, 'pending_at_terminal_cutoff': 0, 'source_hash': 'dd31e0254f1326adb0db59cbd02333f0fe8e58e7e937f8b150062aa753728720', 'independent_checks': ['raw packet identities and final outcomes', 'class-specific denominators and latency', 'token bucket and server intervals', 'main/tail resource overlap', 'AoI and QoS interval integration', 'common potential channel results'], 'deterministic_replays': [{'scenario': 'normal', 'policy': 'fud', 'seed': 100}, {'scenario': 'normal', 'policy': 'pf', 'seed': 100}, {'scenario': 'congestion', 'policy': 'fud', 'seed': 100}, {'scenario': 'congestion', 'policy': 'pf', 'seed': 100}, {'scenario': 'nodes_96', 'policy': 'fud', 'seed': 100}, {'scenario': 'nodes_96', 'policy': 'pf', 'seed': 100}, {'scenario': 'markov_link', 'policy': 'fud', 'seed': 100}, {'scenario': 'markov_link', 'policy': 'pf', 'seed': 100}, {'scenario': 'mixed_sizes', 'policy': 'fud', 'seed': 100}, {'scenario': 'mixed_sizes', 'policy': 'pf', 'seed': 100}], 'hardware_measurements': 0}
+AUDIT scaling
+audited total_036_nodes_8: 260 runs
+audited total_036_nodes_24: 520 runs
+audited total_036_nodes_48: 780 runs
+audited total_036_nodes_96: 1040 runs
+{'status': 'PASS', 'metric_version': 2, 'audited_runs': 1040, 'audited_packets': 1501032, 'common_trace_groups': 80, 'pending_at_terminal_cutoff': 0, 'source_hash': 'dd31e0254f1326adb0db59cbd02333f0fe8e58e7e937f8b150062aa753728720', 'independent_checks': ['raw packet identities and final outcomes', 'class-specific denominators and latency', 'token bucket and server intervals', 'main/tail resource overlap', 'AoI and QoS interval integration', 'common potential channel results'], 'deterministic_replays': [{'scenario': 'total_036_nodes_8', 'policy': 'fud', 'seed': 100}, {'scenario': 'total_036_nodes_8', 'policy': 'pf', 'seed': 100}], 'hardware_measurements': 0}
+AUDIT sensitivity
+audited bucket_slots_2: 260 runs
+audited bucket_slots_4: 520 runs
+audited bucket_slots_8: 780 runs
+audited bucket_slots_16: 1040 runs
+audited duty_0.4: 1300 runs
+audited duty_0.8: 1560 runs
+audited duty_1.0: 1820 runs
+audited bitrate_3200: 2080 runs
+audited bitrate_6400: 2340 runs
+audited bitrate_12800: 2600 runs
+audited success_0.55: 2860 runs
+audited success_0.8: 3120 runs
+audited success_0.95: 3380 runs
+audited good_to_bad_0.01: 3640 runs
+audited good_to_bad_0.025: 3900 runs
+audited good_to_bad_0.1: 4160 runs
+audited bad_to_good_0.05: 4420 runs
+audited bad_to_good_0.1: 4680 runs
+audited bad_to_good_0.25: 4940 runs
+audited rate_0.015: 5200 runs
+audited rate_0.04: 5460 runs
+audited rate_0.1: 5720 runs
+audited dt_0.025: 5980 runs
+audited dt_0.05: 6240 runs
+audited dt_0.1: 6500 runs
+{'status': 'PASS', 'metric_version': 2, 'audited_runs': 6500, 'audited_packets': 12215996, 'common_trace_groups': 500, 'pending_at_terminal_cutoff': 0, 'source_hash': 'dd31e0254f1326adb0db59cbd02333f0fe8e58e7e937f8b150062aa753728720', 'independent_checks': ['raw packet identities and final outcomes', 'class-specific denominators and latency', 'token bucket and server intervals', 'main/tail resource overlap', 'AoI and QoS interval integration', 'common potential channel results'], 'deterministic_replays': [{'scenario': 'bucket_slots_2', 'policy': 'fud', 'seed': 100}, {'scenario': 'bucket_slots_2', 'policy': 'pf', 'seed': 100}, {'scenario': 'dt_0.025', 'policy': 'fud', 'seed': 100}, {'scenario': 'dt_0.025', 'policy': 'pf', 'seed': 100}], 'hardware_measurements': 0}

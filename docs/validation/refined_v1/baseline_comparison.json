@@ -1,0 +1,620 @@
+{
+  "status": "PASS",
+  "historical_files_unchanged": 40111,
+  "fud_main_replays_compared": 100,
+  "legacy_fields": [
+    "mean_aoi_s",
+    "normalized_aoi",
+    "event_miss",
+    "pdr",
+    "jain_pdr",
+    "jain_delivery",
+    "latency_s",
+    "p95_latency_s",
+    "cohort_goodput_bps",
+    "utilization",
+    "mean_queue"
+  ],
+  "checks": [
+    {
+      "scenario": "normal",
+      "seed": 100,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 101,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 102,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 103,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 104,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 105,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 106,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 107,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 108,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 109,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 110,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 111,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 112,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 113,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 114,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 115,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 116,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 117,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 118,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "normal",
+      "seed": 119,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 100,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 101,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 102,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 103,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 104,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 105,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 106,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 107,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 108,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 109,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 110,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 111,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 112,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 113,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 114,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 115,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 116,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 117,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 118,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "congestion",
+      "seed": 119,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 100,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 101,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 102,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 103,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 104,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 105,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 106,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 107,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 108,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 109,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 110,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 111,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 112,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 113,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 114,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 115,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 116,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 117,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 118,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "markov_link",
+      "seed": 119,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 100,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 101,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 102,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 103,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 104,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 105,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 106,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 107,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 108,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 109,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 110,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 111,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 112,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 113,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 114,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 115,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 116,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 117,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 118,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "mixed_sizes",
+      "seed": 119,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 100,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 101,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 102,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 103,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 104,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 105,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 106,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 107,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 108,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 109,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 110,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 111,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 112,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 113,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 114,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 115,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 116,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 117,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 118,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    },
+    {
+      "scenario": "nodes_96",
+      "seed": 119,
+      "legacy_fields_equal": true,
+      "main_decisions_equal": true
+    }
+  ]
+}

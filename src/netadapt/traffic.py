@@ -28,15 +28,25 @@ def generate(c: Config, seed: int):
     rates=np.array([f.rate for f in flows])[None,:]
     mult=np.ones((c.slots,1))
     if c.burst:mult[(np.arange(c.slots)%400)<80]=4
-    counts=rng.poisson(np.broadcast_to(rates*mult,(c.slots,c.nodes)))
-    loss=np.random.default_rng(b).random((c.slots,c.nodes))
-    probabilities=np.full((c.slots,c.nodes),c.success)
+    if c.total_rate is None:
+        counts=rng.poisson(np.broadcast_to(rates*mult,(c.slots,c.nodes)))
+    else:
+        # Poisson thinning preserves each flow's rate and gives scale B the
+        # same class arrivals for a seed, independently of the flow count.
+        class_counts=rng.poisson(np.broadcast_to(c.total_rate/3*mult,(c.slots,3)))
+        counts=np.zeros((c.slots,c.nodes),dtype=int)
+        for t,kind in zip(*np.nonzero(class_counts)):
+            ids=np.arange(kind,c.nodes,3)
+            chosen=ids[(rng.random(int(class_counts[t,kind]))*len(ids)).astype(int)]
+            np.add.at(counts[t],chosen,1)
+    loss=np.random.default_rng(b).random((c.end,c.nodes))
+    probabilities=np.full((c.end,c.nodes),c.success)
     if c.link=="markov":
-        switches=np.random.default_rng(d).random((c.slots,c.nodes))
+        switches=np.random.default_rng(d).random((c.end,c.nodes))
         bad=np.zeros(c.nodes,dtype=bool)
-        for t in range(c.slots):
-            bad=np.where(bad,switches[t]>=0.1,switches[t]<0.025)
-            probabilities[t]=np.where(bad,0.20,c.success)
+        for t in range(c.end):
+            bad=np.where(bad,switches[t]>=c.bad_to_good,switches[t]<c.good_to_bad)
+            probabilities[t]=np.where(bad,c.bad_success,c.success)
     successes=loss<probabilities
     arrivals=[];pid=0
     for t in range(c.slots):

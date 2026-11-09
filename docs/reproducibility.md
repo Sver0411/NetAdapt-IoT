@@ -2,58 +2,72 @@
 
 ## 环境与命令
 
-参考实验使用 Mac 本地 Python 虚拟环境。`requirements-lock.txt`记录本机解析出的依赖版本；跨环境复现时按 pyproject.toml 安装，并记录 Python、NumPy 与依赖版本。
+Python 3.11+；依赖及本机版本见 pyproject.toml、requirements-lock.txt 和每组 manifest。项目根目录执行：
 
 ```sh
-.venv/bin/python -m pytest -q
-.venv/bin/python run.py run --config configs/study.json --out output/reproduction --workers 4
-.venv/bin/python run.py analyze --out output/reproduction
-.venv/bin/pio run -d hardware/firmware
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev,hardware]'
+python -m pytest -q
+python run.py run --config configs/refined_v1/pilot.json --out output/reproduction_pilot --workers 4
+python run.py analyze --out output/reproduction_pilot
+python scripts/audit_refined.py output/reproduction_pilot
 ```
 
-只运行一个小实验时复制 `configs/pilot.json` 并删减场景/seed/方法，使用新输出目录。配置更新后生成对应的新实验目录与 hash。workers控制进程并发，调度决策不依赖运行完成顺序；摘要表排序固定。
+开发例子为 78 次运行，正式矩阵分别运行到四个新目录：
+
+```sh
+python run.py run --config configs/refined_v1/main.json --out output/reproduction_v2 --workers 6
+python run.py run --config configs/refined_v1/scaling.json --out output/reproduction_v2/scaling --workers 6
+python run.py run --config configs/refined_v1/sensitivity.json --out output/reproduction_v2/sensitivity --workers 6
+python run.py run --config configs/refined_v1/bucket_load.json --out output/reproduction_v2/bucket_load --workers 6
+python run.py analyze --out output/reproduction_v2
+python run.py analyze --out output/reproduction_v2/scaling
+python run.py analyze --out output/reproduction_v2/sensitivity
+python run.py analyze --out output/reproduction_v2/bucket_load
+python scripts/audit_refined.py output/reproduction_v2
+python scripts/audit_refined.py output/reproduction_v2/scaling
+python scripts/audit_refined.py output/reproduction_v2/sensitivity
+python scripts/audit_refined.py output/reproduction_v2/bucket_load
+pio run -d hardware/firmware -e sender -e receiver
+```
+
+`scripts/run_refined.py` 顺序执行以上完整矩阵、分析和独立审计，输出默认使用 output/study_refined_v1；本轮已生成的结果通过相同源码/config/trace hash 恢复。每次实现或配置改变时选择新输出目录。workers 只改变并发，不改变调度结果。
+
+配置可由 `python scripts/make_refined_configs.py` 重建。全部审计完成后运行 `python scripts/finalize_refined.py`，生成跨参数配对效应、源端 AoI 对照、A–K 报告、双语 README 和最终证据索引。分析只接受 metric_version=2；v1 复现使用发布提交 `1b302342` 的源码和 configs/study.json，原始报告与数据继续位于 output/study/。
 
 ## 数据文件
 
-| 路径 | 含义 |
+| 文件 | 内容 |
 |---|---|
-| manifest.json | 完整场景/seed/方法、Python与NumPy版本、src代码hash、模型标签 |
-| completion.json / failures.json | 实际与期望次数、耗时及失败信息；失败令CLI退出非零 |
-| runs/{scenario}/{seed}/{policy}/config.json | 单次完整参数 |
-| metrics.json | 全部指标、每流统计、trace/config hash、预算审计 |
-| packets.jsonl.gz | 每包id/flow/generated/size、started/received/finished、最终互斥状态 |
-| decisions.jsonl.gz | 每次非抢占服务起点、包和持续时间 |
-| all_runs.csv / per_flow.csv | 所有运行与每流数据 |
-| summary.csv | 各方法seed均值、n和95% bootstrap CI |
-| paired_differences.csv | 每seed相同条件下FUD减基线的差值与CI |
-| negative_results.csv | FUD均值方向更差的全部比较，包括消融，并保留配对区间 |
+| manifest.json | 完整配置、seed、方法、metric_version、源码 hash、依赖与平台 |
+| completion.json / failures.json | 实际/期望次数、耗时和失败记录；失败使运行器退出非零 |
+| runs/{scenario}/{seed}/{policy}/config.json | 单次完整配置 |
+| metrics.json | v2 分类指标、legacy 字段、每流 QoS/资源份额、主/尾窗口和结局 |
+| packets.jsonl.gz | id、flow、generated、size、started、received、finished、主截止点快照和最终状态 |
+| decisions.jsonl.gz | 服务起点、业务流、包 id、完整服务成本 |
+| all_runs.csv / per_flow.csv | 全部运行和业务流的标量指标 |
+| summary.csv | 每个场景/策略/指标的 seed 均值、n、95% CI |
+| paired_differences.csv | FUD−对照的 seed 配对差值和区间 |
+| negative_results.csv | 指标均值朝不利方向变化的全部比较；描述量不作单向排序 |
+| overview.png / ablations.png / results.md | 主指标图、机制消融图和自动报告 |
+| audit.json | 原始日志独立重算、共享轨迹、确定性重放与源码核对 |
+| source_snapshot.zip | 本轮执行源码快照，本地保存 |
 
-`generated`、`started`、`received`、`finished`的单位均为slot，乘配置dt得到秒；payload单位字节。`received`为空表示没确认交付。`cohort_status_counts`的和应等于评估cohort生成数，`status_counts`的和应等于全部输入包数。
+时间单位为 slot，乘 dt 得秒；payload 单位为字节，服务资源为抽象 slots。完整数学定义与分母见 [metrics-v2.md](metrics-v2.md)。
 
-互斥状态：queued（截至观察末仍排队）、inflight（尚未反馈）、replaced、overflow、expired、link_loss、delivered、late。状态替换的包计入 PDR 分母，按 replaced、overflow、expired 与 link_loss 分解原因，并同时记录 AoI。
+## 随机性和统计
 
-`event_miss`统计cohort内事件生成包未及时交付的比例；没有事件时为null。`mean_aoi_s`统计warmup后全部slot的状态流平均AoI；与cohort并非同一统计对象。`cohort_goodput_bps`按cohort生成窗口归一化，`observation_goodput_bps`按实际观察时间窗口到达字节统计。两个字段分别对应生成 cohort 与接收观察窗口。
+每个 seed 用三个独立 RNG 流产生到达、潜在成功结果和 Markov 转移。同一配置/seed 的全部策略共享 Trace；发送的绝对 slot/flow 决定读取的潜在结果。Trace hash 包含到达、信道、配置和 seed。
 
-`jain_pdr`按每流PDR归一化，排除无生成流；全零取0。`jain_delivery`按交付包数，更偏向高产生率；两者回答不同问题。latency/P95 按交付包统计，miss 与 PDR 提供对应的交付水平。
+固定总负载实验在不同节点规模下保持分类到达时刻及包数相同，之后按类均匀拆分。其他节点规模实验固定每流速率，因此总到达量随流数改变。
 
-## 配对随机与统计
+以 seed 为统计重复单位，20 个 seed 均值及配对差值各进行 2,000 次 bootstrap，分析 seed 为 20261106。CI 为探索性逐项区间，完整比较集和不利方向均保留。
 
-每seed一次生成完整到达与潜在信道结果，全部方法读取同一Trace。链路结果按发送绝对slot与flow索引，调度器读取历史反馈状态。文件中的trace_hash同时含counts、success、config和seed；同一scenario/seed跨policy必须唯一。
+## 版本与完整性
 
-置信区间用20个seed配对差值进行2000次bootstrap，固定分析seed20261106。以 seed 为重复单位，报告点差值和区间。完整比较集采用探索性分析。
+原结果目录、manifest、配置、审计及报告不作改写。第一轮修改前的文件摘要见 docs/validation/refined_v1/baseline_inventory.json，原 README/研究报告/协议副本见 output/archive/refinement_baseline/。历史文案修订指纹仍位于 documentation_revision.json，适用于 v1。
 
-pilot seeds 0、1用于实现检查，正式评估使用100–119。修订记录、对应源码与各版本完整数据按实验目录保存。
+v2 manifest 的 code_hash 对 src 下全部 Python 源文件逐字节计算。审计要求当前源码与 manifest 一致，并重放代表性 FUD 和 PF 运行；后续代码变化可使用该批次源码快照恢复执行环境。
 
-## macOS Python 3.14启动入口
-
-本次发现虚拟环境中的editable .pth被文件系统hidden标志标记，Python3.14跳过该文件，导致包导入失败。已清除该标志，并提供根目录run.py显式加载src，因此建议使用上面的run.py命令；测试也显式配置src路径。run.py 为源码目录提供统一启动入口。
-
-## 文档版本与计算指纹
-
-manifest.json 保留实验执行时的完整源码 hash。后续报告文字整理记录在 documentation_revision.json；该记录保存原始 hash、当前 hash 与计算代码的 AST 指纹。audit_study.py 使用这些版本记录核对计算实现，并重放代表场景。
-
-## 仓库数据结构
-
-仓库保存汇总 CSV、每流统计、图表、实验配置与运行环境。逐包日志位于本地 output/**/runs/，源码快照和完整原始校验文件也保留在本地。重跑配置生成 output/reproduction 后，执行以下命令审计完整数据：
-
-    .venv/bin/python scripts/audit_study.py output/reproduction
+仓库保存汇总 CSV、报告、配置、图表和审计。原始压缩逐包日志和源码快照位于本地 output/**/runs/ 与 source_snapshot.zip，按配置运行可重新生成。

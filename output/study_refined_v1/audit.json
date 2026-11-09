@@ -1,0 +1,70 @@
+{
+  "status": "PASS",
+  "metric_version": 2,
+  "audited_runs": 3900,
+  "audited_packets": 9308650,
+  "common_trace_groups": 300,
+  "pending_at_terminal_cutoff": 0,
+  "source_hash": "dd31e0254f1326adb0db59cbd02333f0fe8e58e7e937f8b150062aa753728720",
+  "independent_checks": [
+    "raw packet identities and final outcomes",
+    "class-specific denominators and latency",
+    "token bucket and server intervals",
+    "main/tail resource overlap",
+    "AoI and QoS interval integration",
+    "common potential channel results"
+  ],
+  "deterministic_replays": [
+    {
+      "scenario": "normal",
+      "policy": "fud",
+      "seed": 100
+    },
+    {
+      "scenario": "normal",
+      "policy": "pf",
+      "seed": 100
+    },
+    {
+      "scenario": "congestion",
+      "policy": "fud",
+      "seed": 100
+    },
+    {
+      "scenario": "congestion",
+      "policy": "pf",
+      "seed": 100
+    },
+    {
+      "scenario": "nodes_96",
+      "policy": "fud",
+      "seed": 100
+    },
+    {
+      "scenario": "nodes_96",
+      "policy": "pf",
+      "seed": 100
+    },
+    {
+      "scenario": "markov_link",
+      "policy": "fud",
+      "seed": 100
+    },
+    {
+      "scenario": "markov_link",
+      "policy": "pf",
+      "seed": 100
+    },
+    {
+      "scenario": "mixed_sizes",
+      "policy": "fud",
+      "seed": 100
+    },
+    {
+      "scenario": "mixed_sizes",
+      "policy": "pf",
+      "seed": 100
+    }
+  ],
+  "hardware_measurements": 0
+}

@@ -1,0 +1,10 @@
+{
+  "scheduler_choose_ast_sha256": "246d5bfcb905883016910367a5f895750eb31547f130d350de442fad7109848c",
+  "debt_target": "0.5*duty*0.8*weight/(sum(weights)*service)",
+  "debt_update": "min(50,max(0,debt+target*backlogged-useful_ACKs))",
+  "coefficients": [
+    1,
+    1,
+    0.25
+  ]
+}

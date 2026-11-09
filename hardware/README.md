@@ -55,3 +55,13 @@ host_rtt_s 记录 USB、UART、无线数据和 ACK 的事务往返时间。确�
 硬件预算按配置服务成本与事务墙钟耗时的较大值扣除。硬件示例采用 1s slot；完成时序校准后生成新的服务率配置。
 
 后续增加独立发送节点及接入协议，开展多节点竞争实验；加入电流采集设备后记录实际事务能耗。
+
+## 第一轮构建与 PF 时序修订
+
+`firmware/boards/esp32-s3-n16r8.json` 为本地板定义：16 MB QIO Flash、`default_16MB.csv` 分区、`qio_opi` Arduino SDK、OPI PSRAM、`BOARD_HAS_PSRAM`、USB CDC on boot 和 USB mode 1。内部 RAM 容量字段为 320 KB，外部 PSRAM 由 OPI 驱动初始化。
+
+默认双端 GPIO 为 UART RX=17、TX=18、M0=4、M1=5、AUX=6；UART1 为 9600 8N1，USB Serial 为 115200。接线和帧协议沿用现有版本。PlatformIO 6.9.0 的 Arduino 构建脚本从 board.build.arduino.memory_type 选择 esp32s3/qio_opi SDK，因此 OPI 设置实际参与编译。
+
+PF 初始每流吞吐为 1 byte/slot，alpha=0.01；主机按逻辑时隙更新，空闲及失败 slot 的 ACK 字节为零，成功 ACK 在完成时刻向上取整后的 slot 边界生效。共享实现为 `netadapt.scheduler.pf_update`。物理事务按主机时间计费，仿真服务按配置整数 slots 计费；二者使用同一 PF EWMA 规则。
+
+本轮 sender、receiver 分别构建成功；日志见 [refined firmware-build.log](../docs/validation/refined_v1/firmware-build.log)。物理链路校准、无线事务成功率和电流采集列为下一阶段工作。

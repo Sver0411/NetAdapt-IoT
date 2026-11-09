@@ -1,6 +1,6 @@
 <h1 align="center">NetAdapt-IoT</h1>
 
-<p align="center"><strong>Adaptive Resource Scheduling for Multi-Flow IoT Networks</strong></p>
+<p align="center"><strong>Adaptive Scheduling for a Shared IoT Gateway Outlet</strong></p>
 
 <p align="center">Age of Information · Deadline-Aware Scheduling · Fair Resource Allocation</p>
 
@@ -21,7 +21,7 @@
 
 NetAdapt-IoT is a research platform for scheduling multiple IoT traffic flows over a shared communication outlet. It studies how limited network resources can be allocated among fresh state updates, deadline-sensitive events, and devices with different service requirements.
 
-The project combines a Python slotted network simulator, nine baseline schedulers, the Freshness–Urgency–Debt (FUD) policy, three mechanism ablations, and an automated experiment pipeline. The current software evaluation contains **3,900 runs across 15 scenarios and 20 seeds**, with packet-level records, paired statistics, and comparison figures. An ESP32-S3/E220 firmware pair and PC replay tool support the next stage of single-link experiments.
+The project combines a Python slotted model, nine baseline schedulers, the Freshness–Urgency–Debt (FUD) policy, three mechanism ablations, and an automated experiment pipeline. The refined evaluation contains **12,480 runs across 48 named conditions, 20 seeds, and 13 policies**: the original 15-scenario matrix, four fixed-total-load scale conditions, 25 model-sensitivity conditions, and four congestion bucket-capacity conditions. It records packet outcomes, class-specific delivery metrics, actual service shares, and paired intervals. ESP32-S3/E220 firmware and a PC replay tool support the next stage of physical link experiments.
 
 <a id="research-question-and-method"></a>
 
@@ -69,34 +69,34 @@ Each scenario/seed group gives all 13 methods the same traffic, time-indexed pot
 
 The 15 scenarios cover normal load, congestion, 8/24/48/96 logical devices, unequal source rates, equal priorities, weak links, Markov losses, bursts, resource-budget changes, feedback delay, mixed packet sizes, and lossless service.
 
-Evaluation tracks state AoI, event deadline miss ratio, packet delivery ratio, average/P95 latency, goodput, queue length, service utilization, and Jain fairness of per-flow delivery ratios. Full definitions and parameters are in the [experiment protocol](research/experiments/protocol.md) and [study configuration](configs/study.json).
+Evaluation separates state AoI, replacement and transmission success from event deadline outcomes. Resource fairness uses actual abstract service slots, with equal-share and weight-proportional Jain references. Every policy uses the same main window and arrival-free tail; main-window pending snapshots are separate from final outcomes. The [metric definitions](docs/metrics-v2.md), [protocol](research/experiments/protocol.md), and [frozen configurations](configs/refined_v1/) define each denominator and control.
 
 <a id="key-findings"></a>
 
-## Key findings: software evaluation
+## Key findings: refined software evaluation
 
-The final matrix contains **15 scenarios × 20 seeds (100–119) × 13 methods = 3,900 simulation runs**. Each run uses 4,000 slots and a 500-slot warmup. Event metrics use a guarded generation cohort; confidence intervals resample paired seed differences.
+The main matrix contains 3,900 runs, the fixed-total-load scale group 1,040, model sensitivity 6,500, and congestion bucket sensitivity 1,040. Each condition uses seeds 100–119 and all 13 methods. Sensitivity groups retain their own baseline; repeated baseline conditions are analyzed within their groups. State AoI and Service Share use the main observation window; event outcomes include the common tail.
 
-| Scenario | Policy | State mean AoI (s) ↓ | Event deadline miss (%) ↓ | Jain(PDR) ↑ |
+| Scenario | Policy | State mean AoI (s) ↓ | Event miss (%) ↓ | Jain Service Share ↑ |
 | --- | --- | ---: | ---: | ---: |
-| Congestion | FIFO | 2.2841 | 96.42 | 0.7140 |
-| Congestion | AoI-gain | 4.8532 | 47.33 | 0.7449 |
-| Congestion | FUD | 3.5046 | 63.18 | 0.8184 |
-| Bursty | FIFO | 5.5966 | 33.96 | 0.9851 |
-| Bursty | AoI-gain | 5.6617 | 13.85 | 0.9861 |
-| Bursty | FUD | 5.5926 | 18.15 | 0.9882 |
+| Congestion | FIFO | 2.2841 | 96.42 | 0.7159 |
+| Congestion | AoI-gain | 4.8532 | 47.31 | 0.7441 |
+| Congestion | FUD | 3.5046 | 63.15 | 0.8187 |
+| Bursty | FIFO | 5.5966 | 33.91 | 0.9751 |
+| Bursty | AoI-gain | 5.6617 | 13.83 | 0.9808 |
+| Bursty | FUD | 5.5926 | 18.13 | 0.9818 |
 
-**Congestion:** compared with FIFO, FUD reduces event misses by 33.24 percentage points and increases state AoI by 1.22049 s. Compared with AoI-gain, it achieves lower state AoI and higher Jain(PDR), while more events miss their deadlines.
+**Congestion:** FUD−FIFO event miss is -33.27238 [-33.59573, -32.98051] percentage points; state AoI changes by +1.22049 [+1.20904, +1.23202] s (95% paired bootstrap CI). FUD has higher event miss and lower state AoI than AoI-gain.
 
-**Bursty traffic:** compared with FIFO, FUD reduces event misses by 15.81 percentage points. The AoI difference is −0.00394 s, with a 95% paired bootstrap interval of `[−0.03330, +0.02285]` s.
+**Debt ablation:** congestion Service Share Jain changes by +0.00052 [-0.00074, +0.00171]. The interval spans zero, so the resource-fairness gain is unresolved in this condition.
 
-**Mechanism ablation:** adding debt changes Jain(PDR) by approximately +0.00196 under congestion and −0.00010 under bursts. Its contribution depends on the workload.
+**Scale and model controls:** scale A keeps per-flow rate fixed; scale B keeps total traffic and class arrivals fixed across 8/24/48/96 flows. Bucket capacities 2/4/8/16 and seven other parameter groups test the model conditions. The [A–K report](research/REPORT.md) gives all five hypotheses, comparator intervals, favorable and adverse results.
 
-![Scheduling policies across simulation scenarios](output/study/overview.png)
+![Main-window freshness, event deadlines, and service allocation](output/study_refined_v1/overview.png)
 
-![Freshness, urgency, and debt ablations](output/study/ablations.png)
+![FUD component ablations](output/study_refined_v1/ablations.png)
 
-The figures show how freshness, timely delivery, and fairness move together across workloads. All 13 methods are included in the [summary](output/study/summary.csv), [paired comparisons](output/study/paired_differences.csv), and [per-flow results](output/study/per_flow.csv). The [results report](output/study/results.md) and [negative-results table](output/study/negative_results.csv) retain the full comparison set.
+Full data: [summary](output/study_refined_v1/summary.csv) · [paired comparisons](output/study_refined_v1/paired_differences.csv) · [per-flow metrics](output/study_refined_v1/per_flow.csv) · [adverse directions](output/study_refined_v1/negative_results.csv) · [fixed-total scale](output/study_refined_v1/scaling/results.md) · [model sensitivity](output/study_refined_v1/sensitivity/results.md) · [congestion buckets](output/study_refined_v1/bucket_load/results.md). Historical v1 results remain in [output/study](output/study/results.md).
 
 <a id="implementation-status"></a>
 
@@ -104,16 +104,16 @@ The figures show how freshness, timely delivery, and fairness move together acro
 
 | Component | Progress |
 | --- | --- |
-| Traffic generation, queues, channel model, and 13 scheduling methods | Implemented; software-tested |
-| Automated experiment runner and statistical analysis | 3,900 completed runs; zero execution failures |
-| Python unit and integration checks | 34 tests passed |
-| Dataset audit | 3,900 runs checked; 300 shared-trace groups verified |
-| Deterministic replay | Five representative FUD runs reproduced with identical metrics |
-| PC serial protocol and logical-flow replay | Implemented; mocked serial tests passed |
-| ESP32-S3 N16R8 sender and receiver firmware | Both PlatformIO builds passed |
-| Physical single-link calibration and experiments | Next stage |
+| Mixed-flow queues, common tail, and 13 scheduling policies | Implemented; FUD score unchanged |
+| Refined software experiments | 12,480 completed runs; zero execution failures |
+| Python unit and integration checks | 48 tests passed |
+| Independent raw-ledger audit | All 12,480 runs; packet, resource, AoI, and QoS checks passed |
+| Published baseline preservation | 40,111 historical files unchanged; 100 FUD main-window runs match |
+| PF simulation and replay | Shared slot EWMA; mocked ACK timing tests passed |
+| ESP32-S3 N16R8 firmware | Sender/receiver builds passed; QIO/OPI SDK and 16 MB image header verified |
+| Physical calibration, radio runs, and power capture | Next stage |
 
-The hardware path uses two ESP32-S3 boards and two E220-400T22S radios. The PC schedules logical flows through the sender, and the receiver validates CRC-protected frames and returns ACKs. Setup and capture commands are in the [hardware guide](hardware/README.md). Build logs and software checks are collected in the [validation record](docs/validation/status.md).
+The hardware path uses two ESP32-S3 boards and two E220-400T22S radios. The PC schedules logical flows through the sender; the receiver validates CRC-protected frames and returns ACKs. See the [hardware guide](hardware/README.md) and [validation record](docs/validation/status.md).
 
 <a id="quick-start"></a>
 
@@ -128,30 +128,32 @@ python -m pip install -e '.[dev,hardware]'
 python -m pytest -q
 ```
 
-Run the 52-run software example and generate its report:
+Run the 78-run software example and generate its report:
 
 ```bash
-python run.py run --config configs/pilot.json --out output/quickstart --workers 2
+python run.py run --config configs/refined_v1/pilot.json --out output/quickstart --workers 2
 python run.py analyze --out output/quickstart
 ```
 
-Run the full experiment matrix:
+Run the main experiment matrix:
 
 ```bash
-python run.py run --config configs/study.json --out output/reproduction --workers 4
+python run.py run --config configs/refined_v1/main.json --out output/reproduction --workers 4
 python run.py analyze --out output/reproduction
 ```
+
+Full scale and sensitivity commands are in the [reproduction guide](docs/reproducibility.md).
 
 Choose a new output directory for each fresh experiment. Matching source hashes and configurations allow an existing experiment to resume. The `hardware` extra includes serial-test dependencies and PlatformIO.
 
 Audit the reproduced dataset or build the firmware:
 
 ```bash
-python scripts/audit_study.py output/reproduction
+python scripts/audit_refined.py output/reproduction
 pio run -d hardware/firmware
 ```
 
-Each run saves its configuration, seed, source/trace hashes, packet outcomes, and scheduling decisions. Analysis adds CSV summaries, paired bootstrap intervals, PNG figures, and a Markdown report. Environment details are recorded in [requirements-lock.txt](requirements-lock.txt) and the experiment [manifest](output/study/manifest.json).
+Each run saves its configuration, seed, source/trace hashes, packet outcomes, and scheduling decisions. Analysis adds CSV summaries, paired bootstrap intervals, PNG figures, and a Markdown report. Environment details are recorded in [requirements-lock.txt](requirements-lock.txt) and the experiment [manifest](output/study_refined_v1/manifest.json).
 
 The repository includes experiment summaries, per-flow tables, reports, and figures. Packet-level logs and historical source snapshots remain in the local output directories; the experiment commands regenerate packet records from the saved configurations.
 
@@ -171,10 +173,10 @@ NetAdapt-IoT focuses on network-level service ordering. It keeps source generati
 | Topic | Documentation |
 | --- | --- |
 | Method and equations | [Research proposal](research/design/proposal.md) |
-| Experiment design | [Protocol](research/experiments/protocol.md) · [Configuration](configs/study.json) |
+| Experiment design | [Protocol](research/experiments/protocol.md) · [Configuration](configs/refined_v1/main.json) |
 | Software structure | [Architecture](docs/architecture.md) |
-| Results and data | [Results report](output/study/results.md) · [Summary CSV](output/study/summary.csv) |
-| Reproduction and auditing | [Reproduction guide](docs/reproducibility.md) · [Audit](output/study/audit.json) |
+| Results and data | [Results report](output/study_refined_v1/results.md) · [Summary CSV](output/study_refined_v1/summary.csv) |
+| Reproduction and auditing | [Reproduction guide](docs/reproducibility.md) · [Audit](output/study_refined_v1/audit.json) |
 | Hardware and development | [Hardware guide](hardware/README.md) · [Roadmap](docs/roadmap.md) |
 
 Next development priorities:

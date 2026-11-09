@@ -1,0 +1,7 @@
+{
+  "analysis": "instantaneous lossless source freshness baseline",
+  "formula": "excess_aoi = receiver_aoi - source_latest_generation_aoi; source update occurs at generation slot",
+  "window": "[warmup,slots), initial source and receiver timestamps zero",
+  "rows": 2080,
+  "script_sha256": "719c98b3a191fa27036f668c78bfa7d2f654b75bc743679e141cd7cfa387b82f"
+}
