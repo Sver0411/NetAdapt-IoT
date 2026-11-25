@@ -12,4 +12,5 @@ jobs:
       - run: python -m pip install -r requirements-lock.txt
       - run: python -m pip install -e . --no-build-isolation
       - run: python -m pytest -q
+      - run: python -m platformio run -d hardware/firmware -e sender -e receiver
       - run: python scripts/audit_firmware.py
