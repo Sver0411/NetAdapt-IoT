@@ -70,18 +70,20 @@ NetAdapt-IoT 是一个面向多业务 IoT 网络的资源调度研究平台，�
 
 ![真实 54 节点 Intel Berkeley 负载与 H3 欠账消融](output/phase2_validation/figures/fig04_intel_real_traffic.png)
 
-### 零动态分配纯 C11 嵌入式内核（`src/netadapt/c11/`）
+### 零动态分配纯 C11 嵌入式内核（`src/netadapt/c11/` 与 ESP32-S3 真机实测）
 
 | 指标（`-std=c11 -Wall -Wextra -Werror`） | 实测值 |
 | :--- | :--- |
-| 静态 RAM（`sizeof(na_sched_t)`，支持 96 并发流） | **4,624 B（4.52 KB）**，**0 B 堆分配** |
+| 静态 RAM（`sizeof(na_sched_t)`，支持 96 并发流） | **4,624 B（4.52 KB）**，仅占 ESP32-S3 SRAM 的 0.88% |
 | ESP32-S3 Xtensa `-Os` Flash（`netadapt_sched.o`，8 策略） | **2,746 B（2.68 KB `.text`）**，`0 B .data`，`0 B .bss` |
-| 宿主机 $O(N)$ 单时隙决策时延（`FUD-Ada`，`N=8/24/48/96`） | **0.15 / 0.37 / 0.66 / 1.20 µs**（Apple clang `-O2`，5 万次均值） |
+| **ESP32-S3 240 MHz 真机运行时堆变化**（`ESP.getFreeHeap()`） | **0 B**（20 组连续基准前后均为 `361,620 B`） |
+| **ESP32-S3 240 MHz 真机单时隙实测耗时**（`FUD-Ada`，`N=8/24/48/96`） | **0.20 / 0.67 / 1.39 / 2.91 ms**（占 100 ms 时隙 `<2.91%`，软件 FP64） |
+| 宿主机 arm64 $O(N)$ 单时隙耗时（`FUD-Ada`，`N=8/24/48/96`） | **0.15 / 0.37 / 0.66 / 1.20 µs**（Apple clang `-O2`，5 万次均值） |
 | Python–C11 位级轨迹一致性（状态误差 `< 1e-11`） | **24 / 24 全轨迹零偏差**（8 策略 × 3 场景） |
 
-![纯 C11 O(N) 扩展性与 ESP32-S3 资源占用](output/phase2_validation/figures/fig05_c11_scaling.png)
+![纯 C11 ESP32-S3 真机扩展性与资源占用](output/phase2_validation/figures/fig05_c11_scaling.png)
 
-完整 Phase 2 文档：[IEEEtran 英文论文 PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 中文技术报告](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 配对效应 CSV](output/phase2_validation/paired_effects.csv) · [C11 基准 JSON](output/phase2_c11/benchmark.json)。
+完整 Phase 2 文档：[IEEEtran 英文论文 PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 中文技术报告](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 配对效应 CSV](output/phase2_validation/paired_effects.csv) · [ESP32-S3 真机实测 JSON](output/phase2_c11/esp32s3_onchip_benchmark.json) · [宿主机 C11 基准 JSON](output/phase2_c11/benchmark.json)。
 
 <a id="research-question-and-method"></a>
 
@@ -171,7 +173,7 @@ flowchart LR
 | 真实 E220 硬件日志与 54 节点 MIT Intel Berkeley 流量 | 24 条实测 E220 日志（`3,359` 次尝试）+ 12 个留出日真实传感网流量 |
 | Python + C11 单元、一致性与集成测试 | **74 项测试全部通过**（v1 `48` 项 + Phase 2 / C11 `26` 项） |
 | 原始日志审计与历史基线保留 | 12,480 次 v1 全量审计通过；40,111 个历史文件原样保留 |
-| ESP32-S3 N16R8 固件与独立 IEEEtran 论文 | 双端固件编译核对通过；7 页 IEEE 论文 PDF 与 Graphical Abstract 编译完成 |
+| ESP32-S3 N16R8 固件与独立 IEEEtran 论文 | `sender`/`receiver`/`c11_bench` 真机验证通过；8 页 IEEE 论文（30 篇文献、2 项命题证明）+ Graphical Abstract |
 | 物理多节点 MAC 竞争与示波器实测功耗 | 下一阶段 |
 
 硬件路径使用两块 ESP32-S3 和两套 E220-400T22S，PC 安排逻辑流发送顺序，接收端校验 CRC 并返回 ACK。接线与运行见[硬件指南](hardware/README.md)，构建与软件证据见[验证记录](docs/validation/status.md)。

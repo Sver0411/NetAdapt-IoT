@@ -221,26 +221,39 @@ def build_fig04_intel_and_h3(summary: list[dict], effects: list[dict]) -> None:
 
 def build_fig05_c11() -> None:
     bench = json.loads((OUT_C11 / "benchmark.json").read_text())
+    esp_bench = json.loads((OUT_C11 / "esp32s3_onchip_benchmark.json").read_text())
     scales = [8, 24, 48, 96]
-    fud_ns = [next(x["mean_ns"] for x in bench["host_latency_scaling"] if x["policy"] == "fud" and x["n_flows"] == n) for n in scales]
-    ada_ns = [next(x["mean_ns"] for x in bench["host_latency_scaling"] if x["policy"] == "fud_ada" and x["n_flows"] == n) for n in scales]
 
-    fig, axes = plt.subplots(1, 2, figsize=(IEEE_W, 2.25))
-    axes[0].plot(scales, [v / 1000.0 for v in fud_ns], "s-", color="#228833", lw=1.4, ms=4.5, label="Frozen FUD (C11)")
-    axes[0].plot(scales, [v / 1000.0 for v in ada_ns], "o-", color="#004488", lw=1.7, ms=4.8, label="FUD-Ada (C11)")
-    for n, vf, va in zip(scales, fud_ns, ada_ns):
-        x_txt = n + (3.2 if n == 8 else 0.0)
-        axes[0].text(x_txt, va / 1000.0 + 0.06, f"{va/1000.0:.2f} µs", ha="center", va="bottom", fontsize=6.6, color="#004488")
-    axes[0].set(title="(a) Pure C11 Per-Slot Latency Scaling ($O(N)$)", xlabel="Active Concurrent Flows ($N$)",
-                ylabel="Mean Decision Latency (µs)", xticks=scales, xlim=(1, 104), ylim=(0, 1.48))
+    def _esp_ms(pol: str) -> list[float]:
+        return [
+            next(x["full_us"] for x in esp_bench["benchmarks"] if x["policy"] == pol and x["n_flows"] == n) / 1000.0
+            for n in scales
+        ]
+
+    fig, axes = plt.subplots(1, 2, figsize=(IEEE_W, 2.32))
+    axes[0].plot(scales, _esp_ms("fud_ada"), "o-", color="#004488", lw=1.7, ms=4.8, label="FUD-Ada (ESP32-S3)")
+    axes[0].plot(scales, _esp_ms("fud"), "s-", color="#228833", lw=1.35, ms=4.3, label="Frozen FUD")
+    axes[0].plot(scales, _esp_ms("edf"), "^--", color="#cc3311", lw=1.15, ms=4.0, label="EDF")
+    axes[0].plot(scales, _esp_ms("aoi_gain"), "D-.", color="#aa3377", lw=1.1, ms=3.7, label="AoI-Gain")
+    axes[0].plot(scales, _esp_ms("fifo"), "*:", color="#666666", lw=1.1, ms=4.4, label="FIFO")
+    ada_ms = _esp_ms("fud_ada")
+    for n, va in zip(scales, ada_ms):
+        x_txt = n + (4.2 if n == 8 else (-4.5 if n == 96 else 0.0))
+        y_off = 0.14 if n != 96 else 0.13
+        axes[0].text(x_txt, va + y_off, f"{va:.2f} ms", ha="center", va="bottom", fontsize=6.4, color="#004488", fontweight="bold")
+    axes[0].set(title="(a) Real ESP32-S3 (240 MHz) Per-Slot Latency ($O(N)$)", xlabel="Active Concurrent Flows ($N$)",
+                ylabel="Measured On-Chip Latency (ms)", xticks=scales, xlim=(1, 105), ylim=(0, 3.45))
+    axes[0].text(0.97, 0.54, "<2.91% of 100 ms slot\n(SW FP64, 0 B heap delta)", transform=axes[0].transAxes,
+                 ha="right", va="center", fontsize=6.1, color="#004488",
+                 bbox=dict(fc="#f4f8fc", ec="#b0c4de", pad=2.0))
     axes[0].grid(True)
-    axes[0].legend(fontsize=7.0, loc="upper left", frameon=True)
+    axes[0].legend(fontsize=6.3, loc="upper left", frameon=True, ncol=1, borderpad=0.25)
 
     # Panel (b): ESP32-S3 static resource footprint bar chart
-    items = ["Static RAM\n(96 flows)", "ESP32-S3\nFlash (-Os)", "Dynamic\nHeap", "Static .data\n& .bss"]
+    items = ["Static RAM\n(96 flows)", "ESP32-S3\nFlash (-Os)", "Runtime Heap\nDelta", "Static .data\n& .bss"]
     kb = [bench["static_ram"]["sizeof_na_sched_t"] / 1024.0,
           bench["esp32s3_cross_compile"]["netadapt_sched_o"]["text_bytes"] / 1024.0,
-          0.0, 0.0]
+          float(esp_bench["heap_check"]["delta"]) / 1024.0, 0.0]
     cols = ["#004488", "#228833", "#cccccc", "#cccccc"]
     bars = axes[1].bar(range(len(items)), kb, width=0.52, color=cols, edgecolor="#222222", lw=0.6)
     for b, v in zip(bars, kb):
@@ -271,7 +284,7 @@ def build_graphical_abstract(summary: list[dict], effects: list[dict]) -> None:
         (7.35, "#e8eef5", "#335577", "Sub-Quadratic State Freshness\n$F_i = w_i \\sqrt{G_i}$"),
         (5.20, "#dbeafe", "#004488", "Deadline-Feasible Urgency\n$U_i = w_i(1+v_p/\\tau_i)(1+1/(1+\\sigma_p))$"),
         (3.05, "#e6f4ea", "#1b6e35", "Lyapunov-Scaled Debt (Fixes H3)\n$D_i = 2.5\\,w_i\\ln(1 + d_i)$"),
-        (1.25, "#fff4e5", "#b25e09", "ESP32-S3 C11: 4.52 KB RAM (96 flows)\n2.68 KB Flash  |  1.20 µs  |  24/24 Parity"),
+        (1.25, "#fff4e5", "#b25e09", "ESP32-S3 Silicon (240 MHz): 0.20–2.91 ms\n4.52 KB RAM | 2.68 KB Flash | 0 B Heap"),
     ]
     for y, fc, ec, txt in cards:
         ax1.add_patch(FancyBboxPatch((0.85, y - 0.62), 8.3, 1.48, boxstyle="round,pad=0.14", fc=fc, ec=ec, lw=1.0))

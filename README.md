@@ -70,18 +70,20 @@ Frozen `FUD` (`src/netadapt/scheduler.py`, preserved unmodified with its AST SHA
 
 ![Real 54-Mote Intel Berkeley Workload & H3 Debt Fairness](output/phase2_validation/figures/fig04_intel_real_traffic.png)
 
-### Zero-Allocation Pure C11 Embedded Gateway Kernel (`src/netadapt/c11/`)
+### Zero-Allocation Pure C11 Embedded Gateway Kernel (`src/netadapt/c11/` & Real ESP32-S3 Silicon)
 
 | Metric (`-std=c11 -Wall -Wextra -Werror`) | Measured Value |
 | :--- | :--- |
-| Static RAM (`sizeof(na_sched_t)`, 96 concurrent flows) | **4,624 B (4.52 KB)**, **0 B heap** |
+| Static RAM (`sizeof(na_sched_t)`, 96 concurrent flows) | **4,624 B (4.52 KB)**, 0.88% of ESP32-S3 SRAM |
 | ESP32-S3 Xtensa `-Os` Flash (`netadapt_sched.o`, 8 policies) | **2,746 B (2.68 KB `.text`)**, `0 B .data`, `0 B .bss` |
-| Host $O(N)$ decision latency (`FUD-Ada`, `N = 8 / 24 / 48 / 96`) | **0.15 / 0.37 / 0.66 / 1.20 µs** (Apple clang `-O2`, 50k iters) |
+| **Real ESP32-S3 240 MHz runtime heap delta** (`ESP.getFreeHeap()`) | **0 B** (`361,620 B` before & after 20 runs) |
+| **Real ESP32-S3 240 MHz per-slot latency** (`FUD-Ada`, `N = 8 / 24 / 48 / 96`) | **0.20 / 0.67 / 1.39 / 2.91 ms** (`<2.91%` of 100 ms slot, SW FP64) |
+| Host arm64 $O(N)$ latency (`FUD-Ada`, `N = 8 / 24 / 48 / 96`) | **0.15 / 0.37 / 0.66 / 1.20 µs** (Apple clang `-O2`, 50k iters) |
 | Bit-exact Python–C11 trajectory parity (`< 1e-11` state error) | **24 / 24 full runs** (8 policies × 3 scenarios) |
 
-![Pure C11 O(N) Scaling & ESP32-S3 Footprint](output/phase2_validation/figures/fig05_c11_scaling.png)
+![Pure C11 Real ESP32-S3 O(N) Scaling & Footprint](output/phase2_validation/figures/fig05_c11_scaling.png)
 
-Full Phase 2 reports & manuscript: [IEEEtran Manuscript PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 Chinese Technical Report](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 Paired Effects CSV](output/phase2_validation/paired_effects.csv) · [C11 Benchmark JSON](output/phase2_c11/benchmark.json).
+Full Phase 2 reports & manuscript: [IEEEtran Manuscript PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 Chinese Technical Report](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 Paired Effects CSV](output/phase2_validation/paired_effects.csv) · [ESP32-S3 On-Chip Benchmark JSON](output/phase2_c11/esp32s3_onchip_benchmark.json) · [Host C11 Benchmark JSON](output/phase2_c11/benchmark.json).
 
 <a id="research-question-and-method"></a>
 
@@ -171,7 +173,7 @@ Full data: [summary](output/study_refined_v1/summary.csv) · [paired comparisons
 | Real E220 hardware traces & 54-mote MIT Intel Berkeley traffic | 24 audited E220 logs (`3,359` RF attempts) + 12 held-out Intel Berkeley days |
 | Python + C11 unit, parity & integration checks | **74 tests passed** (`48` frozen v1 + `26` Phase 2 / C11 parity) |
 | Independent raw-ledger audit & baseline preservation | All 12,480 v1 runs audited; 40,111 historical files unchanged |
-| ESP32-S3 N16R8 firmware & standalone IEEEtran manuscript | Dual firmware builds verified; 7-page IEEE PDF + Graphical Abstract compiled |
+| ESP32-S3 N16R8 firmware & standalone IEEEtran manuscript | `sender`/`receiver`/`c11_bench` verified on silicon; 8-page IEEE PDF (30 refs, 2 propositions) + Graphical Abstract |
 | Live multi-node MAC contention & oscilloscope power capture | Next stage |
 
 The hardware path uses two ESP32-S3 boards and two E220-400T22S radios. The PC schedules logical flows through the sender; the receiver validates CRC-protected frames and returns ACKs. See the [hardware guide](hardware/README.md) and [validation record](docs/validation/status.md).

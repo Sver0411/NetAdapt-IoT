@@ -62,13 +62,15 @@ $$F_i(t) = w_i\sqrt{G_i(t)} \text{ (状态流)},\qquad U_i(t) = w_i\!\left(1+\fr
 
 ![Phase 2 纯 C11 调度延迟扩展性与 ESP32-S3 资源体积](../output/phase2_validation/figures/fig05_c11_scaling.png)
 
-源码位于 [`src/netadapt/c11/netadapt_sched.{h,c}`](../src/netadapt/c11/netadapt_sched.c)，完整微基准见 [`output/phase2_c11/benchmark.json`](../output/phase2_c11/benchmark.json)：
+源码位于 [`src/netadapt/c11/netadapt_sched.{h,c}`](../src/netadapt/c11/netadapt_sched.c)，ESP32-S3 真机实测与宿主机微基准分别见 [`output/phase2_c11/esp32s3_onchip_benchmark.json`](../output/phase2_c11/esp32s3_onchip_benchmark.json) 与 [`output/phase2_c11/benchmark.json`](../output/phase2_c11/benchmark.json)：
 
 | 指标（`-std=c11 -Wall -Wextra -Werror`） | 实测数值 |
 | :--- | :---: |
-| 静态调度器 RAM（`sizeof(na_sched_t)`，支持最多 **96 条并发流**） | **4,624 B（4.52 KB）**，0 B 堆分配 |
+| 静态调度器 RAM（`sizeof(na_sched_t)`，支持最多 **96 条并发流**） | **4,624 B（4.52 KB）**，仅占 ESP32-S3 SRAM 的 0.88% |
 | ESP32-S3 Xtensa（`-Os`）Flash 代码体积（含 8 种完整策略） | **2,746 B（2.68 KB）`.text`**，`0 B .data / .bss` |
-| 主机 C11 线性 $O(N)$ 单步耗时（Apple arm64 `-O2`，50,000 次迭代） | `N=8`: **0.15 µs** · `N=24`: **0.37 µs** · `N=48`: **0.66 µs** · `N=96`: **1.20 µs** |
+| **ESP32-S3 240 MHz 真机运行时堆变化**（`ESP.getFreeHeap()`） | **0 B**（20 组基准前后均为 `361,620 B`） |
+| **ESP32-S3 240 MHz 真机单步耗时**（`FUD-Ada`，软件 FP64） | `N=8`: **0.20 ms** · `N=24`: **0.67 ms** · `N=48`: **1.39 ms** · `N=96`: **2.91 ms**（`<2.91%` 时隙占比） |
+| 宿主机 C11 线性 $O(N)$ 单步耗时（Apple arm64 `-O2`，50,000 次迭代） | `N=8`: **0.15 µs** · `N=24`: **0.37 µs** · `N=48`: **0.66 µs** · `N=96`: **1.20 µs** |
 | Python–C11 全轨迹逐帧一致验证（8 策略 × 3 场景） | **24 / 24** 全通过（状态误差 $<10^{-11}$） |
 
 ---

@@ -1,0 +1,242 @@
+{
+  "mcu_info": {
+    "chip": "ESP32-S3",
+    "rev": 0,
+    "cpu_mhz": 240,
+    "sizeof_na_sched_t": 4624,
+    "max_flows": 96
+  },
+  "benchmarks": [
+    {
+      "policy": "fifo",
+      "n_flows": 8,
+      "iters": 500,
+      "full_us": 25.712,
+      "full_cyc": 6170.8,
+      "choose_us": 6.15,
+      "choose_cyc": 1475.6,
+      "sink": 4110
+    },
+    {
+      "policy": "edf",
+      "n_flows": 8,
+      "iters": 500,
+      "full_us": 81.33,
+      "full_cyc": 19518.7,
+      "choose_us": 61.93,
+      "choose_cyc": 14862.7,
+      "sink": 5042
+    },
+    {
+      "policy": "aoi_gain",
+      "n_flows": 8,
+      "iters": 500,
+      "full_us": 79.768,
+      "full_cyc": 19143.9,
+      "choose_us": 54.922,
+      "choose_cyc": 13180.5,
+      "sink": 4593
+    },
+    {
+      "policy": "fud",
+      "n_flows": 8,
+      "iters": 500,
+      "full_us": 126.468,
+      "full_cyc": 30351.7,
+      "choose_us": 109.946,
+      "choose_cyc": 26386.7,
+      "sink": 2798
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 8,
+      "iters": 500,
+      "full_us": 199.878,
+      "full_cyc": 47970.0,
+      "choose_us": 186.314,
+      "choose_cyc": 44715.3,
+      "sink": 5442
+    },
+    {
+      "policy": "fifo",
+      "n_flows": 24,
+      "iters": 500,
+      "full_us": 73.072,
+      "full_cyc": 17536.8,
+      "choose_us": 17.684,
+      "choose_cyc": 4244.2,
+      "sink": 16928
+    },
+    {
+      "policy": "edf",
+      "n_flows": 24,
+      "iters": 500,
+      "full_us": 243.104,
+      "full_cyc": 58344.6,
+      "choose_us": 190.236,
+      "choose_cyc": 45656.1,
+      "sink": 16946
+    },
+    {
+      "policy": "aoi_gain",
+      "n_flows": 24,
+      "iters": 500,
+      "full_us": 233.064,
+      "full_cyc": 55935.1,
+      "choose_us": 164.752,
+      "choose_cyc": 39539.7,
+      "sink": 9287
+    },
+    {
+      "policy": "fud",
+      "n_flows": 24,
+      "iters": 500,
+      "full_us": 364.724,
+      "full_cyc": 87532.9,
+      "choose_us": 315.11,
+      "choose_cyc": 75626.0,
+      "sink": 16924
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 24,
+      "iters": 500,
+      "full_us": 668.474,
+      "full_cyc": 160433.5,
+      "choose_us": 583.042,
+      "choose_cyc": 139929.4,
+      "sink": 8227
+    },
+    {
+      "policy": "fifo",
+      "n_flows": 48,
+      "iters": 500,
+      "full_us": 143.822,
+      "full_cyc": 34516.5,
+      "choose_us": 35.012,
+      "choose_cyc": 8402.4,
+      "sink": 23934
+    },
+    {
+      "policy": "edf",
+      "n_flows": 48,
+      "iters": 500,
+      "full_us": 486.466,
+      "full_cyc": 116751.9,
+      "choose_us": 383.412,
+      "choose_cyc": 92018.5,
+      "sink": 24212
+    },
+    {
+      "policy": "aoi_gain",
+      "n_flows": 48,
+      "iters": 500,
+      "full_us": 467.152,
+      "full_cyc": 112116.2,
+      "choose_us": 326.672,
+      "choose_cyc": 78400.9,
+      "sink": 28522
+    },
+    {
+      "policy": "fud",
+      "n_flows": 48,
+      "iters": 500,
+      "full_us": 679.102,
+      "full_cyc": 162984.2,
+      "choose_us": 573.996,
+      "choose_cyc": 137758.5,
+      "sink": 25673
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 48,
+      "iters": 500,
+      "full_us": 1394.096,
+      "full_cyc": 334582.7,
+      "choose_us": 1170.28,
+      "choose_cyc": 280866.8,
+      "sink": 26799
+    },
+    {
+      "policy": "fifo",
+      "n_flows": 96,
+      "iters": 500,
+      "full_us": 283.154,
+      "full_cyc": 67956.6,
+      "choose_us": 69.664,
+      "choose_cyc": 16718.7,
+      "sink": 37952
+    },
+    {
+      "policy": "edf",
+      "n_flows": 96,
+      "iters": 500,
+      "full_us": 973.116,
+      "full_cyc": 233547.4,
+      "choose_us": 769.868,
+      "choose_cyc": 184767.9,
+      "sink": 38726
+    },
+    {
+      "policy": "aoi_gain",
+      "n_flows": 96,
+      "iters": 500,
+      "full_us": 925.44,
+      "full_cyc": 222105.4,
+      "choose_us": 664.064,
+      "choose_cyc": 159374.9,
+      "sink": 44758
+    },
+    {
+      "policy": "fud",
+      "n_flows": 96,
+      "iters": 500,
+      "full_us": 1324.748,
+      "full_cyc": 317939.1,
+      "choose_us": 1115.73,
+      "choose_cyc": 267774.6,
+      "sink": 39989
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 96,
+      "iters": 500,
+      "full_us": 2908.354,
+      "full_cyc": 698005.0,
+      "choose_us": 2720.342,
+      "choose_cyc": 652881.7,
+      "sink": 44355
+    }
+  ],
+  "heap_check": {
+    "before": 361620,
+    "after": 361620,
+    "delta": 0
+  },
+  "raw_lines": [
+    "NETADAPT_ESP32S3_BENCH_START",
+    "MCU_INFO chip=ESP32-S3 rev=0 cpu_mhz=240 sizeof_na_sched_t=4624 max_flows=96",
+    "BENCH policy=fifo n_flows=8 iters=500 full_us=25.712 full_cyc=6170.8 choose_us=6.150 choose_cyc=1475.6 sink=4110",
+    "BENCH policy=edf n_flows=8 iters=500 full_us=81.330 full_cyc=19518.7 choose_us=61.930 choose_cyc=14862.7 sink=5042",
+    "BENCH policy=aoi_gain n_flows=8 iters=500 full_us=79.768 full_cyc=19143.9 choose_us=54.922 choose_cyc=13180.5 sink=4593",
+    "BENCH policy=fud n_flows=8 iters=500 full_us=126.468 full_cyc=30351.7 choose_us=109.946 choose_cyc=26386.7 sink=2798",
+    "BENCH policy=fud_ada n_flows=8 iters=500 full_us=199.878 full_cyc=47970.0 choose_us=186.314 choose_cyc=44715.3 sink=5442",
+    "BENCH policy=fifo n_flows=24 iters=500 full_us=73.072 full_cyc=17536.8 choose_us=17.684 choose_cyc=4244.2 sink=16928",
+    "BENCH policy=edf n_flows=24 iters=500 full_us=243.104 full_cyc=58344.6 choose_us=190.236 choose_cyc=45656.1 sink=16946",
+    "BENCH policy=aoi_gain n_flows=24 iters=500 full_us=233.064 full_cyc=55935.1 choose_us=164.752 choose_cyc=39539.7 sink=9287",
+    "BENCH policy=fud n_flows=24 iters=500 full_us=364.724 full_cyc=87532.9 choose_us=315.110 choose_cyc=75626.0 sink=16924",
+    "BENCH policy=fud_ada n_flows=24 iters=500 full_us=668.474 full_cyc=160433.5 choose_us=583.042 choose_cyc=139929.4 sink=8227",
+    "BENCH policy=fifo n_flows=48 iters=500 full_us=143.822 full_cyc=34516.5 choose_us=35.012 choose_cyc=8402.4 sink=23934",
+    "BENCH policy=edf n_flows=48 iters=500 full_us=486.466 full_cyc=116751.9 choose_us=383.412 choose_cyc=92018.5 sink=24212",
+    "BENCH policy=aoi_gain n_flows=48 iters=500 full_us=467.152 full_cyc=112116.2 choose_us=326.672 choose_cyc=78400.9 sink=28522",
+    "BENCH policy=fud n_flows=48 iters=500 full_us=679.102 full_cyc=162984.2 choose_us=573.996 choose_cyc=137758.5 sink=25673",
+    "BENCH policy=fud_ada n_flows=48 iters=500 full_us=1394.096 full_cyc=334582.7 choose_us=1170.280 choose_cyc=280866.8 sink=26799",
+    "BENCH policy=fifo n_flows=96 iters=500 full_us=283.154 full_cyc=67956.6 choose_us=69.664 choose_cyc=16718.7 sink=37952",
+    "BENCH policy=edf n_flows=96 iters=500 full_us=973.116 full_cyc=233547.4 choose_us=769.868 choose_cyc=184767.9 sink=38726",
+    "BENCH policy=aoi_gain n_flows=96 iters=500 full_us=925.440 full_cyc=222105.4 choose_us=664.064 choose_cyc=159374.9 sink=44758",
+    "BENCH policy=fud n_flows=96 iters=500 full_us=1324.748 full_cyc=317939.1 choose_us=1115.730 choose_cyc=267774.6 sink=39989",
+    "BENCH policy=fud_ada n_flows=96 iters=500 full_us=2908.354 full_cyc=698005.0 choose_us=2720.342 choose_cyc=652881.7 sink=44355",
+    "HEAP_CHECK before=361620 after=361620 delta=0",
+    "NETADAPT_ESP32S3_BENCH_END"
+  ]
+}

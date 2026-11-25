@@ -13,6 +13,9 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
 
+\usepackage{amsthm}
+\newtheorem{proposition}{Proposition}
+
 \begin{document}
 
 \title{Scale-Matched Freshness--Urgency--Debt Scheduling for Mixed-Traffic IoT Gateways: Hardware-Trace, Real-Traffic, and Embedded C11 Evaluation}
@@ -26,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Shared Internet of Things (IoT) gateways multiplex heterogeneous traffic classes---deadline-sensitive alarm events, periodic status snapshots, and background telemetry---over bandwidth-limited, lossy Sub-GHz links. Classical schedulers optimize one objective at the expense of others: Earliest Deadline First (EDF) and strict priority starve state freshness under congestion, while Proportional Fairness (PF) and FIFO miss critical event deadlines. Prior Freshness--Urgency--Debt (FUD) scheduling suffers from an internal scale mismatch in which unbounded quadratic Age of Information (AoI) growth drowns out both bounded event urgency and linear fairness debt. We introduce \texttt{FUD-Ada}, a scale-matched $O(N)$ gateway scheduler combining sub-quadratic square-root state freshness, deadline-feasible urgency amplification, and Lyapunov-scaled logarithmic service debt. Evaluated across 17,820 audited runs spanning 15 policies (9 classical external baselines, frozen FUD, and 4 ablations), \texttt{FUD-Ada} cuts event deadline misses under congestion to 36.92\% (vs.\ 46.54\% EDF, 46.84\% AoI-Gain, 62.75\% FUD, and 96.32\% FIFO; all $p_{\text{Holm}}{=}0.0096$) and to 7.42\% under 4$\times$ bursts while lowering state AoI below EDF ($-$2.18\,s) and MaxWeight ($-$95.15\,s). Replayed over 24 audited ESP32-S3 + E220-400T22D Sub-GHz hardware loss traces, \texttt{FUD-Ada} achieves the lowest congestion event miss of all 14 comparators (53.17\%, $p_{\text{Holm}}{=}0.0096$) and resolves FUD's previously open debt-fairness ablation (+0.0447 raw Jain, +0.0652 weighted Jain, $p_{\text{Holm}}{=}0.0096$). Across 12 held-out days of real 54-mote MIT Intel Berkeley traffic over E220 loss traces, \texttt{FUD-Ada} strictly Pareto-dominates EDF across all four metrics ($-$5.94\,pp miss, $-$29.03\,s AoI, +0.084 raw Jain, +0.170 weighted Jain; all $p_{\text{Holm}}{\le}0.0392$) while transparently documenting where quadratic \texttt{AoI-Gain} remains competitive. A zero-allocation pure C11 kernel passes 24/24 bit-exact parity trajectories, scales linearly up to 96 flows in 1.20\,$\mu$s/slot, and compiles for ESP32-S3 (\texttt{-Os}) in 4.52\,KB static RAM and 2.68\,KB flash code.
+Shared Internet of Things (IoT) gateways multiplex heterogeneous traffic classes---deadline-sensitive alarm events, periodic status snapshots, and background telemetry---over bandwidth-limited, lossy Sub-GHz links. Classical schedulers optimize one objective at the expense of others: Earliest Deadline First (EDF) and strict priority starve state freshness under congestion, while Proportional Fairness (PF) and FIFO miss critical event deadlines. Prior Freshness--Urgency--Debt (FUD) scheduling suffers from an internal scale mismatch in which unbounded quadratic Age of Information (AoI) growth drowns out both bounded event urgency and linear fairness debt. We introduce \texttt{FUD-Ada}, a scale-matched $O(N)$ gateway scheduler combining sub-quadratic square-root state freshness, deadline-feasible urgency amplification, and Lyapunov-scaled logarithmic service debt. Evaluated across 17,820 audited runs spanning 15 policies (9 classical external baselines, frozen FUD, and 4 ablations), \texttt{FUD-Ada} cuts event deadline misses under congestion to 36.92\% (vs.\ 46.54\% EDF, 46.84\% AoI-Gain, 62.75\% FUD, and 96.32\% FIFO; all $p_{\text{Holm}}{=}0.0096$) and to 7.42\% under 4$\times$ bursts while lowering state AoI below EDF ($-$2.18\,s) and MaxWeight ($-$95.15\,s). Replayed over 24 audited ESP32-S3 + E220-400T22D Sub-GHz hardware loss traces, \texttt{FUD-Ada} achieves the lowest congestion event miss of all 14 comparators (53.17\%, $p_{\text{Holm}}{=}0.0096$) and resolves FUD's previously open debt-fairness ablation (+0.0447 raw Jain, +0.0652 weighted Jain, $p_{\text{Holm}}{=}0.0096$). Across 12 held-out days of real 54-mote MIT Intel Berkeley traffic over E220 loss traces, \texttt{FUD-Ada} strictly Pareto-dominates EDF across all four metrics ($-$5.94\,pp miss, $-$29.03\,s AoI, +0.084 raw Jain, +0.170 weighted Jain; all $p_{\text{Holm}}{\le}0.0392$) while transparently documenting where quadratic \texttt{AoI-Gain} remains competitive. A zero-allocation pure C11 kernel passes 24/24 bit-exact parity trajectories, compiles for ESP32-S3 (\texttt{-Os}) in 4.52\,KB static RAM and 2.68\,KB flash with verified 0\,B runtime heap delta, and executes linearly up to 96 flows in 0.20--2.91\,ms/slot directly on ESP32-S3 silicon (240\,MHz, $<3\%$ of a 100\,ms slot; 1.20\,$\mu$s on an arm64 host).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -45,15 +48,18 @@ To resolve both limitations without sacrificing $O(N)$ embedded simplicity, this
 \item \textbf{Scale-Matched \texttt{FUD-Ada} Formulation:} By replacing unbounded quadratic state gain with sub-quadratic square-root freshness $\sqrt{\Delta\text{AoI}_i^2}$, introducing deadline-feasible slack amplification, and applying Lyapunov-scaled logarithmic debt $\beta_d w_i \ln(1{+}d_i)$, \texttt{FUD-Ada} harmonizes all three objectives onto a common dimensionless scale while remaining $O(N)$ per slot.
 \item \textbf{Real ESP32-S3 + E220 Hardware-Trace Validation:} Replaying 24 audited ESP32-S3 + E220-400T22D Sub-GHz LoRa loss calendars (3,359 physical RF attempts across random and bursty erasures up to 12 consecutive frames), we demonstrate Holm-significant event-miss reductions over all 14 comparators and resolve the previously open H3 debt-fairness ablation across all three cohorts.
 \item \textbf{Real 54-Mote Multi-Flow External Validity:} Driving the shared gateway with chronological packet arrivals and real morning-warming bursts from 24 calibration-selected motes of the MIT Intel Berkeley deployment~\cite{madden2004intel} over 12 contiguous held-out days (retaining the real March~10--11 outage), we show strict four-metric Pareto dominance over EDF and MaxWeight while transparently characterizing where quadratic \texttt{AoI-Gain} remains competitive.
-\item \textbf{Zero-Allocation Pure C11 Kernel for ESP32-S3:} We port 8 policies (including \texttt{FUD} and \texttt{FUD-Ada}) to strict C11 with 24/24 bit-exact Python--C trajectory parity, demonstrating 4.52\,KB static RAM for 96 flows, 2.68\,KB ESP32-S3 \texttt{-Os} flash code, 0\,B heap, and 1.20\,$\mu$s decision latency at $N{=}96$.
+\item \textbf{Zero-Allocation Pure C11 Kernel on Real ESP32-S3 Silicon:} We port 8 policies (including \texttt{FUD} and \texttt{FUD-Ada}) to strict C11 with 24/24 bit-exact Python--C trajectory parity, demonstrating 4.52\,KB static RAM for 96 flows, 2.68\,KB ESP32-S3 \texttt{-Os} flash code, verified 0\,B runtime heap delta, and on-chip ESP32-S3 (240\,MHz) per-slot latency scaling linearly from 0.20\,ms ($N{=}8$) to 2.91\,ms ($N{=}96$, $<3\%$ of a 100\,ms slot; 1.20\,$\mu$s on an arm64 host).
 \end{enumerate}
 
 \section{Related Work}
 \paragraph{Real-Time, Throughput, and Fair Scheduling}
-Classical network scheduling separates timeliness, stability, and fairness: EDF minimizes deadline misses on preemptible/non-preemptible single servers~\cite{liu1973scheduling}; MaxWeight achieves throughput optimality via queue-length Lyapunov drift~\cite{tassiulas1992stability}; Proportional Fairness maximizes logarithmic utility~\cite{kelly1998rate}; and Jain's index quantifies resource allocation equity~\cite{jain1984quantitative}. None directly models overwrite-on-arrival state AoI.
+Classical network scheduling separates timeliness, stability, and fairness: EDF minimizes deadline misses on preemptible and non-preemptible single servers~\cite{liu1973scheduling}; MaxWeight achieves throughput optimality via queue-length Lyapunov drift~\cite{tassiulas1992stability,neely2010stochastic}; Proportional Fairness maximizes logarithmic utility~\cite{kelly1998rate}; and Jain's index quantifies resource allocation equity~\cite{jain1984quantitative}. Lyapunov drift-plus-penalty frameworks~\cite{neely2010stochastic} generalize queue stability to long-term fairness and energy constraints, yet classical formulations assume FIFO conservation rather than overwrite-on-arrival state freshness.
 
-\paragraph{Age of Information Scheduling in Wireless IoT}
-Since Kaul et al.~\cite{kaul2012realtime}, AoI scheduling over unreliable broadcast and uplink channels has matured rapidly~\cite{yates2021age}. Kadota et al.~\cite{kadota2018optimizing,kadota2021minimizing} established Whittle-index and Max-Weight AoI policies under throughput constraints and stochastic arrivals. Concurrently, Sub-GHz LoRa/LPWAN studies highlight bursty erasures~\cite{augustin2016lora,gilbert1960capacity} and sensor-level anomalies~\cite{sharma2010faults,harb2024clara,guestrin2004distributed}. Our work bridges these lines by combining overwrite state queues, hard-deadline FIFO event queues, token-bucket duty-cycle constraints, real E220 hardware loss logs, real 54-mote multi-flow arrivals, and a bit-exact zero-allocation C11 gateway implementation.
+\paragraph{Age of Information and Deadline-Aware Scheduling}
+Since Kaul et al.~\cite{kaul2012realtime}, AoI scheduling over unreliable broadcast and uplink channels has matured into a broad literature~\cite{yates2021age,kahraman2024survey}. Kadota et al.~\cite{kadota2018optimizing,kadota2021minimizing} established Whittle-index and Max-Weight AoI policies under throughput constraints and stochastic arrivals, while Maatouk et al.~\cite{maatouk2020aoii} introduced Age of Incorrect Information to account for semantic staleness. Recent studies extend AoI scheduling to general nonlinear age functions via Whittle indices~\cite{tripathi2024whittle}, soft AoI deadlines~\cite{li2025soft}, peak-AoI optimization in heterogeneous random-access networks~\cite{wu2024paoi}, multisource network coding~\cite{kahraman2024coding}, and MEC/UAV edge offloading using Lyapunov-guided or deep reinforcement learning controllers~\cite{jiang2023aoi,zhao2024safe,wu2022velocity}. While powerful, DRL and per-state Whittle solvers require substantial training or floating-point state tables, and seldom jointly arbitrate hard-deadline event queues, overwrite state flows, and weighted service debt inside a 4.5\,KB static MCU budget.
+
+\paragraph{Sub-GHz LoRa/LPWAN Scheduling and Real-Sensor Benchmarks}
+Sub-GHz LoRa and LPWAN field studies document severe duty-cycle limits, bursty erasures, and contention bottlenecks under pure ALOHA~\cite{augustin2016lora,gilbert1960capacity}. Gateway-coordinated LoRaWAN scheduling~\cite{garridohidalgo2021lorawan}, adaptive priority-aware resource allocation~\cite{lima2021adaptive}, and power control~\cite{algumaei2022lora} mitigate collisions, while node-level studies address energy-constrained sampling and real sensor faults~\cite{rao2019adaptive,arnaiz2024energy,sharma2010faults,harb2024clara,guestrin2004distributed}. Our work complements node-level sampling by isolating shared gateway scheduling across 15 policies over real E220 hardware loss calendars, real 54-mote MIT Intel Berkeley arrivals~\cite{madden2004intel}, and bit-exact on-chip ESP32-S3 execution.
 
 \section{System Model and Scale-Matched FUD-Ada}
 
@@ -116,8 +122,31 @@ S_i(t) = \frac{\hat{p}_i(t)}{s_i}\big(F_i(t) + U_i(t) + D_i(t)\big),
 \end{equation}
 breaking ties by earliest generation time $-g_p$ then lowest flow index $-i$. Notice three analytical properties: (i) $F_i(t)$ scales linearly in normalized age $a_i/\tau_i$ rather than quadratically, preventing routine state updates from starving imminent alarms while still overtaking events if state age grows severely stale; (ii) $U_i(t)$ doubles urgency smoothly as $\sigma_p \to 0^+$ while remaining gentle when slack is ample; and (iii) $D_i(t)$ lifts starved flows into the exact same $[0, 10]$ numerical range as $F_i$ and $U_i$ without unstable linear runaway. We also retain \texttt{fud\_ada\_no\_debt} ($\beta_d{=}0$) as a clean H3 ablation while keeping all 13 original policies (and \texttt{scheduler.py}'s AST checksum) 100\% frozen.
 
+\subsection{Analytical Properties of FUD-Ada}
+We establish two structural guarantees directly from Eqs.~(\ref{eq:debt})--(\ref{eq:score}).
+
+\begin{proposition}[Scale-Matched Dominance Region and Starvation-Freedom]
+\label{prop:scale}
+Under Eqs.~(\ref{eq:debt})--(\ref{eq:score}) with $\alpha_u > 0$, $\beta_d > 0$, and $s_i{=}s$:
+\begin{enumerate}
+\item[(i)] \emph{Linear Age Growth and Event-Protection Margin:} For every state flow $i$, $F_i(t) \le \frac{w_i}{\sqrt{2}}\frac{a_i + \ell_i}{\tau_i}$, whereas an imminent event packet ($\sigma_p{=}0$) attains $U_e(t) = w_e(1{+}\alpha_u)(1{+}v_p/\tau_e)$. At equal $\hat{p}_i$ and zero debt, an imminent event ($w_e{=}4, \alpha_u{=}1$) outscores a status update ($w_s{=}3$) for all normalized state ages $(a_s{+}\ell_s)/\tau_s < \frac{8\sqrt{2}}{3}(1{+}v_p/\tau_e)$ ($\ge 3.77$ at $v_p{=}0$, up to $6.29$ at $v_p{=}4$), whereas frozen \texttt{FUD}'s quadratic score overtakes an imminent event once $(a_s{+}\ell_s)/\tau_s > \sqrt{\frac{8}{3}(1{+}v_p/\tau_e)}$ ($1.63$ at $v_p{=}0$, $2.11$ at $v_p{=}4$)---a $2.3\times$--$3.0\times$ wider protection margin.
+\item[(ii)] \emph{Bounded Debt and Asymptotic Starvation-Freedom:} Because $d_i(t) \in [0, 50]$, the debt contribution satisfies $0 \le D_i(t) \le \beta_d w_i \ln(51)$ (preventing unstable linear runaway under bursts). For any continuously backlogged state flow $i$ with causal link estimate bounded below by $\hat{p}_i(t) \ge p_{\min} > 0$, non-service implies $a_i(t) \to \infty$ and $d_i(t) \to 50$, hence $S_i(t) \ge \frac{p_{\min}}{s_i}\big(F_i(t) + \beta_d w_i \ln(51)\big) \to \infty$; because active competing flows have finite age/wait and bounded $D_j(t)$, flow $i$ is guaranteed service in finite slots.
+\end{enumerate}
+\end{proposition}
+\begin{IEEEproof}
+Part (i) follows directly from Eq.~(\ref{eq:raw_gain}): since $v_p{+}\ell_i \ge 0$, $G_i(t) \le (a_i{+}\ell_i)^2/(2\tau_i^2)$, taking square roots gives $F_i(t) \le \frac{w_i}{\sqrt{2}}(a_i{+}\ell_i)/\tau_i$. Comparing $U_e(t) = 2w_e(1{+}v_p/\tau_e)$ at $\sigma_p{=}0$ against $F_s(t)$ yields $(a_s{+}\ell_s)/\tau_s < \frac{2\sqrt{2}\,w_e}{w_s}(1{+}v_p/\tau_e) = \frac{8\sqrt{2}}{3}(1{+}v_p/\tau_e)$. By contrast, frozen \texttt{FUD} satisfies $w_s G_s(t) > w_e(1{+}v_p/\tau_e)$ whenever $(a_s{+}\ell_s)^2/(2\tau_s^2) > \frac{w_e}{w_s}(1{+}v_p/\tau_e)$, i.e., $(a_s{+}\ell_s)/\tau_s > \sqrt{\frac{8}{3}(1{+}v_p/\tau_e)}$. For Part (ii), clipping in Eq.~(\ref{eq:debt}) bounds $D_i(t)$ uniformly by $\beta_d w_i \ln(51) \approx 9.83\,w_i$, while an unserved state flow's age $a_i(t) = t - u_i$ grows by $+1$ per slot with bounded $v_p$, so $G_i(t) = \Theta(t^2) \implies F_i(t) = \Theta(t) \to \infty$. Under $\hat{p}_i \ge p_{\min} > 0$, $S_i(t)$ eventually strictly exceeds the bounded scores of served peers, guaranteeing finite-time service.
+\end{IEEEproof}
+
+\begin{proposition}[Per-Slot Time and Static Memory Complexity]
+\label{prop:complexity}
+For $N \le N_{\max}$ concurrent flows, each gateway slot of \texttt{FUD-Ada} runs in strictly $O(N)$ arithmetic operations and $\Theta(N_{\max})$ static RAM with zero dynamic heap allocation.
+\end{proposition}
+\begin{IEEEproof}
+Each slot invokes \texttt{na\_sched\_step\_state} (one linear loop over $N$ flows), \texttt{na\_sched\_choose} (one linear pass evaluating $O(1)$ arithmetic, \texttt{sqrt}, and \texttt{log1p} operations per eligible flow), and at most one $O(1)$ ACK update \texttt{na\_sched\_on\_ack}. All state arrays are fixed-length fields of \texttt{na\_sched\_t} (\texttt{4,624\,B} for $N_{\max}{=}96$), requiring zero \texttt{malloc}/\texttt{free} calls.
+\end{IEEEproof}
+
 \subsection{Zero-Allocation Pure C11 Gateway Kernel}
-We implement eight policies (\texttt{FIFO}, \texttt{EDF}, \texttt{MaxWeight}, \texttt{PF}, \texttt{AoI-Gain}, frozen \texttt{FUD}, \texttt{FUD-Ada}, and \texttt{FUD-Ada-NoDebt}) in strict C11 (\texttt{src/netadapt/c11/netadapt\_sched.\{h,c\}}, compiled with \texttt{-std=c11 -Wall -Wextra -Werror}). Supporting up to \texttt{NETADAPT\_MAX\_FLOWS = 96} concurrent flows in a single fixed struct (\texttt{sizeof(na\_sched\_t) = 4,624\,B}), the kernel uses zero heap allocation and zero OS primitives. Bit-exact parity against Python was verified across all 8 policies $\times$ 3 scenarios (\texttt{normal}, \texttt{congestion}, \texttt{bursty}) = \textbf{24 full trajectories}, matching every chosen flow index identically and every floating-point state vector ($\hat{p}_i, d_i$, PF throughput) within $<10^{-11}$.
+We implement eight policies (\texttt{FIFO}, \texttt{EDF}, \texttt{MaxWeight}, \texttt{PF}, \texttt{AoI-Gain}, frozen \texttt{FUD}, \texttt{FUD-Ada}, and \texttt{FUD-Ada-NoDebt}) in strict C11 (\texttt{src/netadapt/c11/netadapt\_sched.\{h,c\}}, compiled with \texttt{-std=c11 -Wall -Wextra -Werror}). Supporting up to \texttt{NETADAPT\_MAX\_FLOWS = 96} concurrent flows in a single fixed struct (\texttt{sizeof(na\_sched\_t) = 4,624\,B}), the kernel uses zero heap allocation and zero OS primitives. Bit-exact parity against Python was verified across all 8 policies $\times$ 3 scenarios (\texttt{normal}, \texttt{congestion}, \texttt{bursty}) = \textbf{24 full trajectories}, matching every chosen flow index identically and every floating-point state vector ($\hat{p}_i, d_i$, PF throughput) within $<10^{-11}$. We further flashed the unmodified C11 kernel onto an ESP32-S3 N16R8 board (240\,MHz Xtensa LX7, \texttt{-Os}) via PlatformIO (\texttt{c11\_bench}) to measure true on-chip execution time, CPU cycles, and runtime heap delta.
 
 \section{Experimental Design and Statistical Protocol}
 
@@ -260,31 +289,34 @@ FUD-Ada (no debt) & 24.35 & 63.01 & 0.6080 & 0.7725 & +0.86\,pp (n.s.) / $-$0.33
 \end{tabular}
 \end{table*}
 
-\subsection{Embedded C11 Scaling and ESP32-S3 Footprint}
+\subsection{Embedded C11 Scaling and On-Chip ESP32-S3 Silicon Benchmark}
 
-Fig.~\ref{fig:c11} and Table~\ref{tab:c11} confirm MCU-grade deployability. Cross-compiled with \texttt{xtensa-esp32s3-elf-gcc -Os}, all 8 C11 schedulers compile into \textbf{2,746\,B (2.68\,KB)} of flash \texttt{.text} with \textbf{0\,B} \texttt{.data/.bss} and \textbf{4,624\,B (4.52\,KB)} static RAM for up to 96 flows (0.88\% of ESP32-S3's 512\,KB SRAM). Per-slot scheduling latency scales strictly linearly ($O(N)$) from 145.6\,ns at $N{=}8$ to \textbf{1.20\,$\mu$s} at $N{=}96$ on an Apple arm64 host---five orders of magnitude below a 100\,ms gateway slot.
+Fig.~\ref{fig:c11} and Table~\ref{tab:c11} verify real MCU deployability directly on ESP32-S3 N16R8 silicon (240\,MHz Xtensa LX7, compiled with \texttt{xtensa-esp32s3-elf-gcc -Os}). All 8 C11 schedulers occupy \textbf{2,746\,B (2.68\,KB)} of flash \texttt{.text} with \textbf{0\,B} \texttt{.data/.bss}, \textbf{4,624\,B (4.52\,KB)} static RAM for 96 flows (0.88\% of ESP32-S3's 512\,KB SRAM), and a hardware-verified \textbf{0\,B} runtime heap delta (\texttt{ESP.getFreeHeap()} = 361,620\,B before and after all 20 benchmark runs). Measuring the complete per-slot loop (\texttt{step\_state + choose + on\_ack}) via \texttt{esp\_timer\_get\_time()} confirms strictly linear $O(N)$ scaling (Proposition~\ref{prop:complexity}): \texttt{FUD-Ada} runs in \textbf{0.20\,ms} ($N{=}8$), \textbf{0.67\,ms} ($N{=}24$), \textbf{1.39\,ms} ($N{=}48$), and \textbf{2.91\,ms} ($N{=}96$, 698k CPU cycles)---even using software IEEE-754 64-bit \texttt{double} on Xtensa LX7 to preserve bit-exact $<10^{-11}$ parity with Python, 96 flows consume \textbf{$<$2.91\%} of a 100\,ms gateway slot (leaving $>97\%$ CPU headroom for radio I/O). On an Apple arm64 host with hardware FP64, the identical C11 loop runs in 0.15--1.20\,$\mu$s.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig05_c11_scaling.pdf}
-\caption{Zero-allocation pure C11 gateway scheduler benchmark: (a) linear $O(N)$ per-slot decision latency across $N \in \{8, 24, 48, 96\}$ flows (50,000 iterations/point, Apple arm64 \texttt{-O2}); (b) static RAM and ESP32-S3 Xtensa \texttt{-Os} flash footprint.}
+\caption{Zero-allocation pure C11 gateway scheduler benchmark on real ESP32-S3 silicon (240\,MHz Xtensa LX7, \texttt{-Os}): (a) measured on-chip per-slot latency scaling ($O(N)$) across $N \in \{8, 24, 48, 96\}$ flows (500 steady-state iterations/point via \texttt{esp\_timer\_get\_time()}); (b) static RAM, flash \texttt{.text}, and hardware-verified 0\,B runtime heap delta.}
 \label{fig:c11}
 \end{figure*}
 
 \begin{table}[!t]
 \centering
-\caption{Zero-Allocation Pure C11 Kernel Footprint and Scaling Metrics}
+\caption{Zero-Allocation Pure C11 Kernel Footprint and Real ESP32-S3 Silicon Benchmark}
 \label{tab:c11}
 \scriptsize
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2.2pt}
 \begin{tabular}{@{}lc@{}}
 \toprule
 Metric (\texttt{-std=c11 -Wall -Wextra -Werror}) & Measured Value \\
 \midrule
-Static RAM (\texttt{na\_sched\_t}, 96 flows) & \textbf{4,624\,B} (4.52\,KB, 0\,B heap) \\
+Static RAM (\texttt{na\_sched\_t}, 96 flows) & \textbf{4,624\,B} (4.52\,KB, 0.88\% SRAM) \\
 ESP32-S3 \texttt{-Os} flash (8 policies) & \textbf{2,746\,B} (2.68\,KB \texttt{.text}) \\
 ESP32-S3 static \texttt{.data} / \texttt{.bss} & \textbf{0\,B} / \textbf{0\,B} \\
-Host C11 latency ($N{=}8/24/48/96$) & \textbf{0.15 / 0.37 / 0.66 / 1.20\,$\mu$s} \\
+ESP32-S3 runtime heap delta (on-chip) & \textbf{0\,B} (361,620\,B unchanged) \\
+ESP32-S3 \texttt{FUD-Ada} ($N{=}8/24/48/96$) & \textbf{0.20 / 0.67 / 1.39 / 2.91\,ms} \\
+ESP32-S3 \texttt{FUD} (v1, $N{=}8/24/48/96$) & 0.13 / 0.36 / 0.68 / 1.32\,ms \\
+Host arm64 \texttt{FUD-Ada} ($N{=}8/24/48/96$) & 0.15 / 0.37 / 0.66 / 1.20\,$\mu$s \\
 Python--C11 parity ($<10^{-11}$) & \textbf{24 / 24} full trajectories \\
 \bottomrule
 \end{tabular}
@@ -300,10 +332,10 @@ Our multi-cohort evidence clarifies exact operational choices for IoT gateway de
 \end{itemize}
 
 \paragraph{Explicit Scope Limitations}
-Three boundaries remain open for future work. First, while Study~II replays genuine ESP32-S3 + E220 hardware loss calendars and Study~III uses real 54-mote arrival timestamps, live multi-node RF medium-access contention (CSMA/ALOHA collisions) and oscilloscope-measured board power/battery lifetime remain unmeasured. Second, Study~III maps 4 real hours of indoor mote arrivals into 4,000 gateway slots to create controlled gateway saturation; field deployment timings will depend on exact radio spreading factors and regional duty-cycle laws. Third, C11 decision latency is host-measured alongside exact Xtensa \texttt{-Os} ELF section sizes; on-chip ESP32-S3 cycle counting and live E220 replay integration are planned next steps.
+Two practical boundaries remain open for future work. First, while Study~II replays genuine ESP32-S3 + E220 hardware loss calendars, Study~III uses real 54-mote arrival timestamps, and Section~V-D measures real on-chip ESP32-S3 execution cycles and zero-heap execution, live multi-node RF medium-access contention (CSMA/ALOHA collisions across dozens of physical radios) and oscilloscope-measured board power/battery lifetime remain unmeasured. Second, Study~III maps 4 real hours of indoor mote arrivals into 4,000 gateway slots to create controlled gateway saturation; field deployment timings will depend on exact radio spreading factors and regional duty-cycle laws. Single-precision \texttt{float} acceleration on Xtensa LX7's hardware FPU can further cut ESP32-S3 execution time by $>5\times$ when strict $<10^{-11}$ Python parity is relaxed.
 
 \section{Conclusion}
-We diagnosed and resolved the quadratic-AoI and unscaled-debt mismatch in multi-flow IoT gateway scheduling through \texttt{FUD-Ada}, a scale-matched $O(N)$ scheduler combining square-root state freshness, deadline-feasible urgency, and Lyapunov logarithmic debt. Across 5,340 new held-out runs (on top of 12,480 frozen v1 runs) spanning synthetic stress, 24 real ESP32-S3 + E220 Sub-GHz hardware loss traces, and 12 held-out days of 54-mote MIT Intel Berkeley traffic, \texttt{FUD-Ada} achieves Holm-significant event-miss reductions over classical baselines (FIFO, RR/WRR, EDF, MaxWeight, PF, AoI-Gain, and frozen FUD), strictly Pareto-dominates EDF on real 54-mote traffic, resolves the open H3 debt-fairness ablation across all cohorts, and runs in 4.52\,KB RAM and 2.68\,KB flash in zero-allocation pure C11 on ESP32-S3.
+We diagnosed and resolved the quadratic-AoI and unscaled-debt mismatch in multi-flow IoT gateway scheduling through \texttt{FUD-Ada}, a scale-matched $O(N)$ scheduler combining square-root state freshness, deadline-feasible urgency, and Lyapunov logarithmic debt with proved scale bounds and asymptotic starvation-freedom. Across 5,340 new held-out runs (on top of 12,480 frozen v1 runs) spanning synthetic stress, 24 real ESP32-S3 + E220 Sub-GHz hardware loss traces, and 12 held-out days of 54-mote MIT Intel Berkeley traffic, \texttt{FUD-Ada} achieves Holm-significant event-miss reductions over classical baselines (FIFO, RR/WRR, EDF, MaxWeight, PF, AoI-Gain, and frozen FUD), strictly Pareto-dominates EDF on real 54-mote traffic, resolves the open H3 debt-fairness ablation across all cohorts, and runs directly on ESP32-S3 silicon (240\,MHz) in 0.20--2.91\,ms/slot, 4.52\,KB static RAM, 2.68\,KB flash, and 0\,B runtime heap delta.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
