@@ -1,0 +1,81 @@
+{
+  "host_platform": "macOS-15.7.7-arm64-arm-64bit-Mach-O",
+  "host_machine": "arm64",
+  "host_compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+  "static_ram": {
+    "sizeof_na_sched_t": 4624,
+    "sizeof_na_flow_cfg_t": 12,
+    "sizeof_na_head_t": 16,
+    "max_flows": 96
+  },
+  "host_latency_scaling": [
+    {
+      "policy": "fud",
+      "n_flows": 8,
+      "iters": 50000,
+      "mean_ns": 114.08,
+      "sink": 195095
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 8,
+      "iters": 50000,
+      "mean_ns": 134.2,
+      "sink": 215014
+    },
+    {
+      "policy": "fud",
+      "n_flows": 24,
+      "iters": 50000,
+      "mean_ns": 341.88,
+      "sink": 564473
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 24,
+      "iters": 50000,
+      "mean_ns": 385.34,
+      "sink": 611817
+    },
+    {
+      "policy": "fud",
+      "n_flows": 48,
+      "iters": 50000,
+      "mean_ns": 486.02,
+      "sink": 1201041
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 48,
+      "iters": 50000,
+      "mean_ns": 657.0,
+      "sink": 1225237
+    },
+    {
+      "policy": "fud",
+      "n_flows": 96,
+      "iters": 50000,
+      "mean_ns": 776.54,
+      "sink": 2392143
+    },
+    {
+      "policy": "fud_ada",
+      "n_flows": 96,
+      "iters": 50000,
+      "mean_ns": 1210.04,
+      "sink": 2451336
+    }
+  ],
+  "host_size_output": "__TEXT\t__DATA\t__OBJC\tothers\tdec\thex\n1516\t0\t0\t128\t1644\t66c",
+  "esp32s3_cross_compile": {
+    "compiler": "xtensa-esp32s3-elf-gcc (crosstool-NG esp-2021r2-patch5) 8.4.0",
+    "flags": "-std=c11 -Wall -Wextra -Werror -Os -mlongcalls -ffunction-sections -fdata-sections",
+    "netadapt_sched_o": {
+      "text_bytes": 2746,
+      "data_bytes": 0,
+      "bss_bytes": 0,
+      "total_bytes": 2746
+    },
+    "note": "Exact ELF section sizes compiled for Xtensa ESP32-S3 (-Os). Runtime latency is host-measured; physical ESP32-S3 cycle/current profiling remains future work."
+  }
+}

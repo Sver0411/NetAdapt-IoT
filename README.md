@@ -8,10 +8,12 @@
 
 <p align="center">
   <a href="#project-overview">Overview</a> ·
+  <a href="#phase-2-upgrade">Phase 2 (FUD-Ada &amp; C11)</a> ·
   <a href="#research-question-and-method">Method</a> ·
   <a href="#key-findings">Results</a> ·
   <a href="#implementation-status">Status</a> ·
   <a href="#quick-start">Quick Start</a> ·
+  <a href="papers/netadapt-iot/manuscript.pdf">IEEE Paper</a> ·
   <a href="README.zh-CN.md">简体中文</a>
 </p>
 
@@ -21,7 +23,65 @@
 
 NetAdapt-IoT is a research platform for scheduling multiple IoT traffic flows over a shared communication outlet. It studies how limited network resources can be allocated among fresh state updates, deadline-sensitive events, and devices with different service requirements.
 
-The project combines a Python slotted model, nine baseline schedulers, the Freshness–Urgency–Debt (FUD) policy, three mechanism ablations, and an automated experiment pipeline. The refined evaluation contains **12,480 runs across 48 named conditions, 20 seeds, and 13 policies**: the original 15-scenario matrix, four fixed-total-load scale conditions, 25 model-sensitivity conditions, and four congestion bucket-capacity conditions. It records packet outcomes, class-specific delivery metrics, actual service shares, and paired intervals. ESP32-S3/E220 firmware and a PC replay tool support the next stage of physical link experiments.
+Across two audited phases (**17,820 total simulation runs across 15 policies**), the repository combines:
+
+- **Frozen v1 benchmark (`12,480 runs`, seeds `100–119`)**: a Python slotted model, 9 classical baselines (`FIFO`, `RR`, `WRR`, `EDF`, `Priority`, `MaxWeight`, `PF`, `AoI-Gain`, `Debt`), the frozen `FUD` policy (AST-checksum locked), and 3 component ablations across 48 named conditions.
+- **Phase 2 upgrade (`+5,340 held-out runs`, seeds `300–319` + 12 real dates)**: the scale-matched **`FUD-Ada`** scheduler (`src/netadapt/ext/`) resolving v1's quadratic-AoI collapse and unresolved H3 debt-fairness ablation; validation over **24 real ESP32-S3 + E220-400T22D Sub-GHz hardware loss traces** (3,359 RF attempts) and **54-mote MIT Intel Berkeley real sensor traffic**; a **zero-allocation pure C11 embedded scheduler kernel** (`4.52 KB` RAM for 96 flows, `2.68 KB` ESP32-S3 `-Os` flash, `24/24` bit-exact Python–C11 parity); and a standalone **IEEEtran manuscript** ([manuscript.pdf](papers/netadapt-iot/manuscript.pdf)).
+
+<a id="phase-2-upgrade"></a>
+
+## Phase 2: Scale-Matched `FUD-Ada`, Real Hardware Traces, 54-Mote Traffic & Pure C11
+
+Frozen `FUD` (`src/netadapt/scheduler.py`, preserved unmodified with its AST SHA-256 lock) exhibited two documented failure modes in [research/REPORT.md](research/REPORT.md): (1) its quadratic state freshness term $w_i G_i(t)$ grew to $13\text{--}38$ under congestion, drowning bounded event urgency ($\approx 6.7$); and (2) its unscaled linear debt ($0.25\,d_i \approx 0.1$) left H3 debt fairness unresolved ($+0.00052$, 95% CI spanning zero).
+
+**`FUD-Ada`** (`src/netadapt/ext/adaptive_scheduler.py`, frozen on disjoint calibration seeds `200–204` with $\alpha_u = 1.0, \beta_d = 2.5$) resolves both with sub-quadratic state freshness $w_i\sqrt{G_i(t)}$, deadline-feasible urgency amplification $w_i(1 + v_p/\tau_i)(1 + \alpha_u/(1 + \sigma_p^+))$, and Lyapunov logarithmic debt $\beta_d w_i \ln(1 + d_i(t))$.
+
+![NetAdapt-IoT Graphical Abstract](papers/netadapt-iot/graphical_abstract.png)
+
+### Key Held-Out Results (5,340 Runs, Disjoint Seeds `300–319` & 12 Real Dates, Global Holm-Bonferroni)
+
+| Cohort | Policy | Event Miss (%) ↓ | State Mean AoI (s) ↓ | Raw Jain ↑ | Weighted Jain ↑ |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| **Synthetic Congestion** (20 seeds) | `FIFO` | 96.32 | 2.28 | 0.7167 | 0.5499 |
+| | `EDF` | 46.54 | 10.27 | 0.7101 | 0.8975 |
+| | `AoI-Gain` | 46.84 | 4.83 | 0.7443 | 0.9600 |
+| | `MaxWeight` | 37.95 | 103.24 | 0.5822 | 0.5033 |
+| | `FUD` (Frozen v1) | 62.75 | 3.50 | 0.8201 | 0.9560 |
+| | **`FUD-Ada` (Ours)** | **36.92** | **8.09** | **0.6293** | **0.8089** |
+| **Real E220 Hardware Traces** (24 logs, Cong.) | `FIFO` | 97.11 | 2.87 | 0.7167 | 0.5499 |
+| | `EDF` | 57.72 | 12.69 | 0.7101 | 0.8975 |
+| | `AoI-Gain` | 58.79 | 5.68 | 0.7505 | 0.9680 |
+| | `FUD` (Frozen v1) | 75.49 | 3.76 | 0.8126 | 0.9124 |
+| | **`FUD-Ada` (Ours)** | **53.17** | **8.44** | **0.6650** | **0.8622** |
+| **Real 54-Mote Intel × E220** (12 dates) | `FIFO` | 98.18 | 19.16 | 0.6564 | 0.5214 |
+| | `EDF` | 69.80 | 53.05 | 0.5826 | 0.6572 |
+| | `MaxWeight` | 82.51 | 81.99 | 0.4706 | 0.3451 |
+| | `AoI-Gain` | **61.72** | **22.15** | 0.7004 | 0.9113 |
+| | `FUD` (Frozen v1) | 87.84 | 19.19 | 0.6338 | 0.7528 |
+| | **`FUD-Ada` (Ours)** | **63.86** | **24.01** | **0.6666** | **0.8275** |
+
+- **Lowest event deadline miss across all 14 comparators** on synthetic `congestion` (`36.92%`, all $p_{\text{Holm}}=0.0096$), synthetic `bursty` (`7.42%`), and pooled real **E220 Sub-GHz hardware traces** (`53.17%`, $-4.55\text{ pp}$ & $-4.25\text{ s}$ AoI vs `EDF`; $-22.32\text{ pp}$ vs frozen `FUD`).
+- **Strict 4-metric Pareto dominance over `EDF` & `MaxWeight` on real 54-mote MIT Intel Berkeley traffic** ($-5.94\text{ pp}$ miss, $-29.03\text{ s}$ AoI [$-54.7\%$], $+0.084$ raw Jain, $+0.170$ weighted Jain vs `EDF`; all $p_{\text{Holm}} \le 0.0392$). Honestly, `AoI-Gain` ties statistically on Intel event miss (`61.72%` vs `63.86%`, $p_{\text{Holm}}=0.927$) with slightly tighter raw AoI (`22.15 s` vs `24.01 s`).
+- **Open H3 debt ablation decisively solved across all 3 cohorts (`FUD-Ada` vs `FUD-Ada-NoDebt`)**: $+0.0486$ raw / $+0.0812$ weighted Jain & $-2.23\text{ s}$ AoI on synthetic congestion ($p_{\text{Holm}}=0.0096$); $+0.0447$ / $+0.0652$ Jain & $-1.49\text{ s}$ AoI on E220 congestion ($p_{\text{Holm}}=0.0096$); $+0.0586$ / $+0.0550$ Jain on real Intel Berkeley traffic ($p_{\text{Holm}}=0.0364$, no significant miss penalty $p_{\text{Holm}}=0.141$).
+
+![Synthetic Congestion & Bursty Pareto Frontier](output/phase2_validation/figures/fig02_pareto_stress.png)
+
+![Real ESP32-S3 + E220 Sub-GHz Hardware Loss Traces](output/phase2_validation/figures/fig03_e220_hardware_traces.png)
+
+![Real 54-Mote Intel Berkeley Workload & H3 Debt Fairness](output/phase2_validation/figures/fig04_intel_real_traffic.png)
+
+### Zero-Allocation Pure C11 Embedded Gateway Kernel (`src/netadapt/c11/`)
+
+| Metric (`-std=c11 -Wall -Wextra -Werror`) | Measured Value |
+| :--- | :--- |
+| Static RAM (`sizeof(na_sched_t)`, 96 concurrent flows) | **4,624 B (4.52 KB)**, **0 B heap** |
+| ESP32-S3 Xtensa `-Os` Flash (`netadapt_sched.o`, 8 policies) | **2,746 B (2.68 KB `.text`)**, `0 B .data`, `0 B .bss` |
+| Host $O(N)$ decision latency (`FUD-Ada`, `N = 8 / 24 / 48 / 96`) | **0.15 / 0.37 / 0.66 / 1.20 µs** (Apple clang `-O2`, 50k iters) |
+| Bit-exact Python–C11 trajectory parity (`< 1e-11` state error) | **24 / 24 full runs** (8 policies × 3 scenarios) |
+
+![Pure C11 O(N) Scaling & ESP32-S3 Footprint](output/phase2_validation/figures/fig05_c11_scaling.png)
+
+Full Phase 2 reports & manuscript: [IEEEtran Manuscript PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 Chinese Technical Report](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 Paired Effects CSV](output/phase2_validation/paired_effects.csv) · [C11 Benchmark JSON](output/phase2_c11/benchmark.json).
 
 <a id="research-question-and-method"></a>
 
@@ -104,14 +164,15 @@ Full data: [summary](output/study_refined_v1/summary.csv) · [paired comparisons
 
 | Component | Progress |
 | --- | --- |
-| Mixed-flow queues, common tail, and 13 scheduling policies | Implemented; FUD score unchanged |
-| Refined software experiments | 12,480 completed runs; zero execution failures |
-| Python unit and integration checks | 48 tests passed |
-| Independent raw-ledger audit | All 12,480 runs; packet, resource, AoI, and QoS checks passed |
-| Published baseline preservation | 40,111 historical files unchanged; 100 FUD main-window runs match |
-| PF simulation and replay | Shared slot EWMA; mocked ACK timing tests passed |
-| ESP32-S3 N16R8 firmware | Sender/receiver builds passed; QIO/OPI SDK and 16 MB image header verified |
-| Physical calibration, radio runs, and power capture | Next stage |
+| Frozen v1 queues, common tail, and 13 scheduling policies | Implemented; `scheduler.py` AST-locked |
+| Phase 2 scale-matched `FUD-Ada` & `FUD-Ada-NoDebt` | Implemented in `src/netadapt/ext/`; H3 debt solved across all 3 cohorts |
+| Zero-allocation pure C11 gateway kernel (8 policies, 96 flows) | `4.52 KB` RAM, `2.68 KB` ESP32-S3 `-Os` Flash, `24/24` Python–C11 parity |
+| Software + real-trace experiments | **17,820 total runs** (`12,480` v1 + `5,340` Phase 2 held-out), zero failures |
+| Real E220 hardware traces & 54-mote MIT Intel Berkeley traffic | 24 audited E220 logs (`3,359` RF attempts) + 12 held-out Intel Berkeley days |
+| Python + C11 unit, parity & integration checks | **74 tests passed** (`48` frozen v1 + `26` Phase 2 / C11 parity) |
+| Independent raw-ledger audit & baseline preservation | All 12,480 v1 runs audited; 40,111 historical files unchanged |
+| ESP32-S3 N16R8 firmware & standalone IEEEtran manuscript | Dual firmware builds verified; 7-page IEEE PDF + Graphical Abstract compiled |
+| Live multi-node MAC contention & oscilloscope power capture | Next stage |
 
 The hardware path uses two ESP32-S3 boards and two E220-400T22S radios. The PC schedules logical flows through the sender; the receiver validates CRC-protected frames and returns ACKs. See the [hardware guide](hardware/README.md) and [validation record](docs/validation/status.md).
 
@@ -146,10 +207,13 @@ Full scale and sensitivity commands are in the [reproduction guide](docs/reprodu
 
 Choose a new output directory for each fresh experiment. Matching source hashes and configurations allow an existing experiment to resume. The `hardware` extra includes serial-test dependencies and PlatformIO.
 
-Audit the reproduced dataset or build the firmware:
+Audit the reproduced dataset, run the Phase 2 real-trace & C11 benchmark suite, or build the firmware:
 
 ```bash
 python scripts/audit_refined.py output/reproduction
+python scripts/benchmark_c11_footprint.py
+python scripts/run_phase2_real_validation.py --workers 6
+python papers/netadapt-iot/build_figures.py
 pio run -d hardware/firmware
 ```
 
@@ -161,6 +225,7 @@ The repository includes experiment summaries, per-flow tables, reports, and figu
 
 | Project | Research focus |
 | --- | --- |
+| [TAIS](https://github.com/Sver0411/TAIS) | Trust-aware closed-loop node-level adaptive sensing over ESP32-S3/E220 |
 | [AdaptiveSense](https://github.com/Sver0411/AdaptiveSense) | Change-aware sampling and upload decisions |
 | [SensorTrust](https://github.com/Sver0411/SensorTrust) | Sensor health assessment and fault detection |
 | [EventGuard-LoRa](https://github.com/Sver0411/EventGuard-LoRa) | Critical-event delivery and bounded communication redundancy |
@@ -172,10 +237,12 @@ NetAdapt-IoT focuses on network-level service ordering. It keeps source generati
 
 | Topic | Documentation |
 | --- | --- |
-| Method and equations | [Research proposal](research/design/proposal.md) |
-| Experiment design | [Protocol](research/experiments/protocol.md) · [Configuration](configs/refined_v1/main.json) |
-| Software structure | [Architecture](docs/architecture.md) |
-| Results and data | [Results report](output/study_refined_v1/results.md) · [Summary CSV](output/study_refined_v1/summary.csv) |
+| Standalone IEEE manuscript | [IEEEtran PDF](papers/netadapt-iot/manuscript.pdf) · [LaTeX Source](papers/netadapt-iot/manuscript.tex) · [Graphical Abstract](papers/netadapt-iot/graphical_abstract.png) |
+| Phase 2 technical report & data | [Phase 2 Report (ZH)](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 Summary CSV](output/phase2_validation/summary.csv) · [C11 Benchmark](output/phase2_c11/benchmark.json) |
+| Method and equations | [Research proposal](research/design/proposal.md) · [FUD-Ada Scheduler](src/netadapt/ext/adaptive_scheduler.py) |
+| Experiment design | [Protocol](research/experiments/protocol.md) · [Configuration](configs/refined_v1/main.json) · [E220 Traces](configs/e220_hardware_traces.json) |
+| Software structure | [Architecture](docs/architecture.md) · [C11 Kernel](src/netadapt/c11/netadapt_sched.h) |
+| Results and data (Frozen v1) | [A–K Report](research/REPORT.md) · [Results report](output/study_refined_v1/results.md) · [Summary CSV](output/study_refined_v1/summary.csv) |
 | Reproduction and auditing | [Reproduction guide](docs/reproducibility.md) · [Audit](output/study_refined_v1/audit.json) |
 | Hardware and development | [Hardware guide](hardware/README.md) · [Roadmap](docs/roadmap.md) |
 

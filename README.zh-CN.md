@@ -8,10 +8,12 @@
 
 <p align="center">
   <a href="#project-overview">概览</a> ·
+  <a href="#phase-2-upgrade">Phase 2（FUD-Ada 与 C11）</a> ·
   <a href="#research-question-and-method">研究方法</a> ·
   <a href="#key-findings">实验结果</a> ·
   <a href="#implementation-status">实现状态</a> ·
   <a href="#quick-start">快速开始</a> ·
+  <a href="papers/netadapt-iot/manuscript.pdf">IEEE 论文</a> ·
   <a href="README.md">English</a>
 </p>
 
@@ -21,7 +23,65 @@
 
 NetAdapt-IoT 是一个面向多业务 IoT 网络的资源调度研究平台，研究多个设备共享有限通信出口时，如何在状态更新的新鲜度、事件截止期和设备服务公平性之间分配资源。
 
-项目包含 Python 离散时隙模型、九种基线调度、Freshness–Urgency–Debt（FUD）策略、三种机制消融和自动实验流程。精修版完成 **48 条命名条件、20 个种子、13 种策略，共 12,480 次运行**：主实验 15 条、固定总负载规模组 4 条、模型敏感性 25 条、高负载桶容量 4 条。保存逐包结局、分类交付指标、实际服务份额和配对区间。ESP32-S3/E220 固件及 PC 重放工具用于下一阶段的物理链路实验。
+项目跨越两个完整审计阶段（**累计 17,820 次运行、15 种调度策略**）：
+
+- **冻结 v1 基准（`12,480` 次，seeds `100–119`）**：Python 离散时隙模型、9 种经典基线（`FIFO`、`RR`、`WRR`、`EDF`、`Priority`、`MaxWeight`、`PF`、`AoI-Gain`、`Debt`）、冻结版 `FUD`（带 AST 哈希锁）及 3 项分量消融，覆盖 48 条命名条件。
+- **Phase 2 全面升级（`+5,340` 次严格留出运行，seeds `300–319` + 12 个真实日期）**：提出尺度匹配调度器 **`FUD-Ada`**（`src/netadapt/ext/`），从根本上解决 v1 报告中的二次 AoI 失衡与 H3 欠账消融悬案；接入 **24 条真实 ESP32-S3 + E220-400T22D Sub-GHz 硬件丢包日志**（3,359 次实测射频尝试）与 **MIT Intel Berkeley 54 节点真实无线传感网多流负载**；实现 **零动态分配纯 C11 嵌入式内核**（96 流仅占 `4.52 KB` RAM、ESP32-S3 `-Os` 仅 `2.68 KB` Flash、`24/24` 轨迹位级一致）；并输出独立 **IEEEtran 论文**（[manuscript.pdf](papers/netadapt-iot/manuscript.pdf)）与完整[中文技术报告](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md)。
+
+<a id="phase-2-upgrade"></a>
+
+## Phase 2：尺度匹配 `FUD-Ada`、真实硬件丢包、54 节点真实流量与纯 C11 内核
+
+冻结版 `FUD`（`src/netadapt/scheduler.py` 保持 100% 不可变以通过 AST SHA-256 锁校验）在 [research/REPORT.md](research/REPORT.md) 中暴露了两个核心短板：（1）拥塞下二次状态项 $w_i G_i(t)$ 膨胀至 $13\text{--}38$，淹没了有界事件紧迫度（$\approx 6.7$）；（2）未缩放线性欠账项（$0.25\,d_i \approx 0.1$）导致 H3 公平性消融跨零无结论（$+0.00052$）。
+
+**`FUD-Ada`**（`src/netadapt/ext/adaptive_scheduler.py`，在独立校准集 `200–204` 冻结 $\alpha_u=1.0, \beta_d=2.5$）以亚二次状态新鲜度 $w_i\sqrt{G_i(t)}$、截止期余量紧迫度放大 $w_i(1+v_p/\tau_i)(1+\alpha_u/(1+\sigma_p^+))$ 与 Lyapunov 对数欠账 $\beta_d w_i \ln(1+d_i(t))$ 同时根治上述两大问题。
+
+![NetAdapt-IoT Graphical Abstract](papers/netadapt-iot/graphical_abstract.png)
+
+### 留出集核心结果（5,340 次运行，全局 Holm-Bonferroni 校正）
+
+| 评测队列 | 策略 | 事件 Miss (%) ↓ | 状态平均 AoI (s) ↓ | 原始 Jain ↑ | 加权 Jain ↑ |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| **合成拥塞**（20 留出种子） | `FIFO` | 96.32 | 2.28 | 0.7167 | 0.5499 |
+| | `EDF` | 46.54 | 10.27 | 0.7101 | 0.8975 |
+| | `AoI-Gain` | 46.84 | 4.83 | 0.7443 | 0.9600 |
+| | `MaxWeight` | 37.95 | 103.24 | 0.5822 | 0.5033 |
+| | `FUD`（冻结 v1） | 62.75 | 3.50 | 0.8201 | 0.9560 |
+| | **`FUD-Ada`（本文）** | **36.92** | **8.09** | **0.6293** | **0.8089** |
+| **真实 E220 硬件日志**（24 条，拥塞） | `FIFO` | 97.11 | 2.87 | 0.7167 | 0.5499 |
+| | `EDF` | 57.72 | 12.69 | 0.7101 | 0.8975 |
+| | `AoI-Gain` | 58.79 | 5.68 | 0.7505 | 0.9680 |
+| | `FUD`（冻结 v1） | 75.49 | 3.76 | 0.8126 | 0.9124 |
+| | **`FUD-Ada`（本文）** | **53.17** | **8.44** | **0.6650** | **0.8622** |
+| **真实 54 节点 Intel × E220**（12 天） | `FIFO` | 98.18 | 19.16 | 0.6564 | 0.5214 |
+| | `EDF` | 69.80 | 53.05 | 0.5826 | 0.6572 |
+| | `MaxWeight` | 82.51 | 81.99 | 0.4706 | 0.3451 |
+| | `AoI-Gain` | **61.72** | **22.15** | 0.7004 | 0.9113 |
+| | `FUD`（冻结 v1） | 87.84 | 19.19 | 0.6338 | 0.7528 |
+| | **`FUD-Ada`（本文）** | **63.86** | **24.01** | **0.6666** | **0.8275** |
+
+- **全基线最低事件 Miss**：在合成拥塞（`36.92%`）、4 倍突发（`7.42%`）与 **24 条真实 E220 硬件丢包日志**（`53.17%`）下，均在全部 14 个对比策略中取得最低事件截止期错失率（全部 $p_{\text{Holm}}=0.0096$；相对 `EDF` 还把状态 AoI 压低 `−2.18 s` 至 `−4.25 s`，相对冻结 `FUD` 降低 `−22.3` 至 `−25.8 pp`）。
+- **真实 54 节点 Intel Berkeley 流量四指标严格帕累托碾压 `EDF` 与 `MaxWeight`**：相对 `EDF` 实现事件 Miss `−5.94 pp`、状态 AoI `−29.03 s`（`−54.7%`）、原始 Jain `+0.084`、加权 Jain `+0.170`（全部 $p_{\text{Holm}} \le 0.0392$）。同时如实披露：`AoI-Gain` 在真实异步突发下事件 Miss 与 `FUD-Ada` 统计学打平（`61.72%` vs `63.86%`, $p_{\text{Holm}}=0.927$）且 AoI 略优。
+- **彻底终结 H3 欠账消融悬案（`FUD-Ada` vs `FUD-Ada-NoDebt`）**：三大队列全部显著正向——合成拥塞 `+0.0486` 原始 / `+0.0812` 加权 Jain 且 AoI 降 `−2.23 s`（$p_{\text{Holm}}=0.0096$）；真实 E220 `+0.0447` / `+0.0652` Jain 且 AoI 降 `−1.49 s`（$p_{\text{Holm}}=0.0096$）；真实 54 节点 Intel Berkeley `+0.0586` / `+0.0550` Jain（$p_{\text{Holm}}=0.0364$，且无显著事件错失代价 $p_{\text{Holm}}=0.141$）。
+
+![合成拥塞与突发帕累托前沿](output/phase2_validation/figures/fig02_pareto_stress.png)
+
+![真实 ESP32-S3 + E220 Sub-GHz 硬件丢包日志验证](output/phase2_validation/figures/fig03_e220_hardware_traces.png)
+
+![真实 54 节点 Intel Berkeley 负载与 H3 欠账消融](output/phase2_validation/figures/fig04_intel_real_traffic.png)
+
+### 零动态分配纯 C11 嵌入式内核（`src/netadapt/c11/`）
+
+| 指标（`-std=c11 -Wall -Wextra -Werror`） | 实测值 |
+| :--- | :--- |
+| 静态 RAM（`sizeof(na_sched_t)`，支持 96 并发流） | **4,624 B（4.52 KB）**，**0 B 堆分配** |
+| ESP32-S3 Xtensa `-Os` Flash（`netadapt_sched.o`，8 策略） | **2,746 B（2.68 KB `.text`）**，`0 B .data`，`0 B .bss` |
+| 宿主机 $O(N)$ 单时隙决策时延（`FUD-Ada`，`N=8/24/48/96`） | **0.15 / 0.37 / 0.66 / 1.20 µs**（Apple clang `-O2`，5 万次均值） |
+| Python–C11 位级轨迹一致性（状态误差 `< 1e-11`） | **24 / 24 全轨迹零偏差**（8 策略 × 3 场景） |
+
+![纯 C11 O(N) 扩展性与 ESP32-S3 资源占用](output/phase2_validation/figures/fig05_c11_scaling.png)
+
+完整 Phase 2 文档：[IEEEtran 英文论文 PDF](papers/netadapt-iot/manuscript.pdf) · [Phase 2 中文技术报告](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 配对效应 CSV](output/phase2_validation/paired_effects.csv) · [C11 基准 JSON](output/phase2_c11/benchmark.json)。
 
 <a id="research-question-and-method"></a>
 
@@ -104,14 +164,15 @@ flowchart LR
 
 | 模块 | 进展 |
 | --- | --- |
-| 混合业务队列、公共尾窗、13 种策略 | 已实现；FUD 评分保持一致 |
-| 精修版软件实验 | 12,480 次完成，0 次执行失败 |
-| Python 单元与集成检查 | 48 项测试通过 |
-| 原始日志独立审计 | 12,480 次包账本、资源、AoI、QoS 检查通过 |
-| 发布基线保留 | 40,111 个历史文件原样保留；100 次 FUD 主窗口运行一致 |
-| PF 仿真与重放 | 共用 slot EWMA，模拟 ACK 时序测试通过 |
-| ESP32-S3 N16R8 固件 | 双端构建成功；QIO/OPI SDK 与 16 MB 镜像头核对通过 |
-| 物理标定、无线实验与电流采集 | 下一阶段 |
+| 冻结 v1 队列、公共尾窗与 13 种策略 | 已实现；`scheduler.py` 保持 AST 哈希锁不变 |
+| Phase 2 尺度匹配 `FUD-Ada` 与 `FUD-Ada-NoDebt` | 已实现于 `src/netadapt/ext/`；三大队列全部解决 H3 欠账消融 |
+| 零动态分配纯 C11 网关内核（8 策略、96 流） | `4.52 KB` RAM、`2.68 KB` ESP32-S3 `-Os` Flash、`24/24` 轨迹一致 |
+| 软件与真实轨迹实验 | **累计 17,820 次**（v1 `12,480` + Phase 2 `5,340`），0 失败 |
+| 真实 E220 硬件日志与 54 节点 MIT Intel Berkeley 流量 | 24 条实测 E220 日志（`3,359` 次尝试）+ 12 个留出日真实传感网流量 |
+| Python + C11 单元、一致性与集成测试 | **74 项测试全部通过**（v1 `48` 项 + Phase 2 / C11 `26` 项） |
+| 原始日志审计与历史基线保留 | 12,480 次 v1 全量审计通过；40,111 个历史文件原样保留 |
+| ESP32-S3 N16R8 固件与独立 IEEEtran 论文 | 双端固件编译核对通过；7 页 IEEE 论文 PDF 与 Graphical Abstract 编译完成 |
+| 物理多节点 MAC 竞争与示波器实测功耗 | 下一阶段 |
 
 硬件路径使用两块 ESP32-S3 和两套 E220-400T22S，PC 安排逻辑流发送顺序，接收端校验 CRC 并返回 ACK。接线与运行见[硬件指南](hardware/README.md)，构建与软件证据见[验证记录](docs/validation/status.md)。
 
@@ -146,10 +207,13 @@ python run.py analyze --out output/reproduction
 
 每个新实验使用新输出目录；源码 hash 与配置一致时，可恢复已有实验。`hardware` extra 包含串口协议测试依赖和 PlatformIO。
 
-审计复现生成的数据，或构建固件：
+审计复现数据、运行 Phase 2 真实轨迹与 C11 基准测试，或构建固件：
 
 ```bash
 python scripts/audit_refined.py output/reproduction
+python scripts/benchmark_c11_footprint.py
+python scripts/run_phase2_real_validation.py --workers 6
+python papers/netadapt-iot/build_figures.py
 pio run -d hardware/firmware
 ```
 
@@ -161,6 +225,7 @@ pio run -d hardware/firmware
 
 | 项目 | 研究重点 |
 | --- | --- |
+| [TAIS](https://github.com/Sver0411/TAIS) | ESP32-S3/E220 信任感知节点级闭环自适应感知与可靠传输 |
 | [AdaptiveSense](https://github.com/Sver0411/AdaptiveSense) | 变化感知采样与上传决策 |
 | [SensorTrust](https://github.com/Sver0411/SensorTrust) | 传感器健康评估与故障检测 |
 | [EventGuard-LoRa](https://github.com/Sver0411/EventGuard-LoRa) | 关键事件交付与有界通信冗余 |
@@ -172,10 +237,12 @@ NetAdapt-IoT 聚焦网络级服务顺序，固定源端产生行为，研究多�
 
 | 主题 | 文档 |
 | --- | --- |
-| 方法与数学定义 | [研究方案](research/design/proposal.md) |
-| 实验设计 | [实验协议](research/experiments/protocol.md) · [配置](configs/refined_v1/main.json) |
-| 软件结构 | [架构说明](docs/architecture.md) |
-| 结果与数据 | [结果报告](output/study_refined_v1/results.md) · [统计 CSV](output/study_refined_v1/summary.csv) |
+| 独立 IEEEtran 英文论文 | [论文 PDF](papers/netadapt-iot/manuscript.pdf) · [LaTeX 源码](papers/netadapt-iot/manuscript.tex) · [Graphical Abstract](papers/netadapt-iot/graphical_abstract.png) |
+| Phase 2 技术报告与数据 | [Phase 2 中文报告](docs/PHASE2_HARDWARE_REALDATA_C11_ZH.md) · [Phase 2 汇总 CSV](output/phase2_validation/summary.csv) · [C11 基准](output/phase2_c11/benchmark.json) |
+| 方法与数学定义 | [研究方案](research/design/proposal.md) · [FUD-Ada 调度器](src/netadapt/ext/adaptive_scheduler.py) |
+| 实验设计 | [实验协议](research/experiments/protocol.md) · [配置](configs/refined_v1/main.json) · [E220 硬件日志](configs/e220_hardware_traces.json) |
+| 软件结构 | [架构说明](docs/architecture.md) · [C11 调度内核](src/netadapt/c11/netadapt_sched.h) |
+| 结果与数据（冻结 v1） | [A–K 报告](research/REPORT.md) · [结果报告](output/study_refined_v1/results.md) · [统计 CSV](output/study_refined_v1/summary.csv) |
 | 复现与审计 | [复现指南](docs/reproducibility.md) · [审计记录](output/study_refined_v1/audit.json) |
 | 硬件与开发 | [硬件指南](hardware/README.md) · [路线图](docs/roadmap.md) |
 
