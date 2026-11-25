@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: >-
+  If you use or discuss NetAdapt-IoT in academic or technical work, please cite
+  this repository.
+type: software
+title: "NetAdapt-IoT: Adaptive Multi-Flow IoT Scheduling with AoI, Deadlines, and Fairness"
+authors:
+  - name: Sver0411
+version: 0.1.0
+date-released: '2026-11-25'
+license: MIT
+repository-code: https://github.com/Sver0411/NetAdapt-IoT
+keywords:
+  - age-of-information
+  - iot
+  - scheduling
+  - qos
+  - reproducible-research
