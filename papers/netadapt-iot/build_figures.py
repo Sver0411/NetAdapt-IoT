@@ -44,8 +44,8 @@ plt.rcParams.update(
 
 STYLES = {
     "fud_ada":         dict(color="#004488", marker="o", ls="-",  lw=1.7, ms=4.5, label="FUD-Ada (Ours)", zorder=7),
-    "fud_ada_no_debt": dict(color="#6699cc", marker="P", ls="--", lw=1.1, ms=3.8, label="FUD-Ada (no debt)", zorder=5),
-    "fud":             dict(color="#228833", marker="s", ls="-",  lw=1.3, ms=4.0, label="FUD (Frozen)", zorder=6),
+    "fud_ada_no_debt": dict(color="#6699cc", marker="P", ls="--", lw=1.1, ms=3.8, label="FUD-Ada-NoDebt", zorder=5),
+    "fud":             dict(color="#228833", marker="s", ls="-",  lw=1.3, ms=4.0, label="FUD-Quad", zorder=6),
     "aoi_gain":        dict(color="#aa3377", marker="D", ls="-.", lw=1.2, ms=3.7, label="AoI-Gain", zorder=5),
     "edf":             dict(color="#cc3311", marker="^", ls="--", lw=1.2, ms=4.0, label="EDF", zorder=5),
     "maxweight":       dict(color="#ee7733", marker="v", ls=":",  lw=1.1, ms=3.9, label="MaxWeight", zorder=4),
@@ -115,7 +115,7 @@ def build_fig02_pareto(summary: list[dict]) -> None:
                 st = extra_styles[p]
                 ax.scatter(x, y, color=st["color"], marker=st["marker"], s=26, zorder=3)
             dx, dy = lbl_offsets[sc].get(p, (4, 2))
-            name_disp = {"fud_ada": "FUD-Ada", "fud_ada_no_debt": "NoDebt", "aoi_gain": "AoI-Gain", "fud": "FUD",
+            name_disp = {"fud_ada": "FUD-Ada", "fud_ada_no_debt": "NoDebt", "aoi_gain": "AoI-Gain", "fud": "FUD-Quad",
                          "edf": "EDF", "fifo": "FIFO", "pf": "PF", "rr": "RR", "wrr": "WRR", "priority": "Prio", "debt": "Debt"}[p]
             ax.annotate(name_disp, (x, y), xytext=(dx, dy), textcoords="offset points",
                         fontsize=6.3, fontweight="bold" if p == "fud_ada" else "normal",
@@ -180,7 +180,7 @@ def build_fig04_intel_and_h3(summary: list[dict], effects: list[dict]) -> None:
         axes[0].scatter(x, y, color=st["color"], marker=st["marker"], s=58 if p == "fud_ada" else 34,
                         edgecolors="#111111" if p == "fud_ada" else "none", linewidths=0.7, zorder=st["zorder"])
         dx, dy = offsets[p]
-        short = {"fud_ada": "FUD-Ada", "fud_ada_no_debt": "NoDebt", "aoi_gain": "AoI-Gain", "fud": "FUD",
+        short = {"fud_ada": "FUD-Ada", "fud_ada_no_debt": "NoDebt", "aoi_gain": "AoI-Gain", "fud": "FUD-Quad",
                  "edf": "EDF", "fifo": "FIFO", "pf": "PF", "maxweight": "MaxWeight"}[p]
         axes[0].annotate(short, (x, y), xytext=(dx, dy), textcoords="offset points",
                          fontsize=6.4, fontweight="bold" if p == "fud_ada" else "normal",
@@ -189,8 +189,8 @@ def build_fig04_intel_and_h3(summary: list[dict], effects: list[dict]) -> None:
                 xlim=(14, 88), ylim=(54, 103))
     axes[0].grid(True)
 
-    # Panel (b): H3 Debt Ablation (FUD-Ada vs FUD-Ada-NoDebt) across all 3 cohorts vs frozen FUD!
-    cats = ["Frozen FUD\n(v1 Cong.)", "FUD-Ada\nSynth Cong.", "FUD-Ada\nE220 Cong.", "FUD-Ada\nIntel Real"]
+    # Panel (b): Debt-Fairness Ablation (FUD-Ada vs FUD-Ada-NoDebt) across all 3 cohorts vs FUD-Quad
+    cats = ["FUD-Quad\n(Cong.)", "FUD-Ada\nSynth Cong.", "FUD-Ada\nE220 Cong.", "FUD-Ada\nIntel Real"]
     # Frozen FUD H3 from REPORT.md: raw +0.00052, weighted +0.00031
     def _get_eff(coh, sub, met):
         r = next(x for x in effects if x["cohort"] == coh and x["subset"] == sub and x["reference"] == "fud_ada_no_debt" and x["metric"] == met)
@@ -210,7 +210,7 @@ def build_fig04_intel_and_h3(summary: list[dict], effects: list[dict]) -> None:
             x_off = -0.04 if (i_bar == 0 and idx_b == 0) else (0.04 if (i_bar == 0 and idx_b == 1) else 0.0)
             axes[1].text(bar.get_x() + bar.get_width()/2 + x_off, h + 0.0028, f"+{h:.3f}", ha="center", va="bottom", fontsize=5.7)
     axes[1].axhline(0.0, color="#222222", lw=0.7)
-    axes[1].set(title="(b) H3 Debt Fairness Gain (All $p_{\\mathrm{Holm}}<0.04$)", xticks=xb, xticklabels=cats,
+    axes[1].set(title="(b) Debt Fairness Gain (All $p_{\\mathrm{Holm}}<0.04$)", xticks=xb, xticklabels=cats,
                 ylabel="Paired Jain Gain (Full − NoDebt)", ylim=(-0.005, 0.116))
     axes[1].grid(axis="y")
     axes[1].legend(fontsize=6.4, loc="upper center", ncol=2, frameon=True, framealpha=0.94, borderpad=0.25, columnspacing=0.8)
@@ -232,7 +232,7 @@ def build_fig05_c11() -> None:
 
     fig, axes = plt.subplots(1, 2, figsize=(IEEE_W, 2.32))
     axes[0].plot(scales, _esp_ms("fud_ada"), "o-", color="#004488", lw=1.7, ms=4.8, label="FUD-Ada (ESP32-S3)")
-    axes[0].plot(scales, _esp_ms("fud"), "s-", color="#228833", lw=1.35, ms=4.3, label="Frozen FUD")
+    axes[0].plot(scales, _esp_ms("fud"), "s-", color="#228833", lw=1.35, ms=4.3, label="FUD-Quad")
     axes[0].plot(scales, _esp_ms("edf"), "^--", color="#cc3311", lw=1.15, ms=4.0, label="EDF")
     axes[0].plot(scales, _esp_ms("aoi_gain"), "D-.", color="#aa3377", lw=1.1, ms=3.7, label="AoI-Gain")
     axes[0].plot(scales, _esp_ms("fifo"), "*:", color="#666666", lw=1.1, ms=4.4, label="FIFO")
@@ -283,7 +283,7 @@ def build_graphical_abstract(summary: list[dict], effects: list[dict]) -> None:
     cards = [
         (7.35, "#e8eef5", "#335577", "Sub-Quadratic State Freshness\n$F_i = w_i \\sqrt{G_i}$"),
         (5.20, "#dbeafe", "#004488", "Deadline-Feasible Urgency\n$U_i = w_i(1+v_p/\\tau_i)(1+1/(1+\\sigma_p))$"),
-        (3.05, "#e6f4ea", "#1b6e35", "Lyapunov-Scaled Debt (Fixes H3)\n$D_i = 2.5\\,w_i\\ln(1 + d_i)$"),
+        (3.05, "#e6f4ea", "#1b6e35", "Lyapunov-Scaled Service Debt\n$D_i = 2.5\\,w_i\\ln(1 + d_i)$"),
         (1.25, "#fff4e5", "#b25e09", "ESP32-S3 Silicon (240 MHz): 0.20–2.91 ms\n4.52 KB RAM | 2.68 KB Flash | 0 B Heap"),
     ]
     for y, fc, ec, txt in cards:
@@ -293,7 +293,7 @@ def build_graphical_abstract(summary: list[dict], effects: list[dict]) -> None:
     # Panel 2: Real E220 Congestion Benchmark
     ax2 = fig.add_axes([0.355, 0.17, 0.255, 0.61])
     pols = ["fifo", "fud", "aoi_gain", "edf", "fud_ada"]
-    lbls = ["FIFO", "FUD\n(v1)", "AoI-Gain", "EDF", "FUD-Ada\n(Ours)"]
+    lbls = ["FIFO", "FUD-\nQuad", "AoI-Gain", "EDF", "FUD-Ada\n(Ours)"]
     misses = [next(float(x["event_deadline_miss"]) * 100 for x in summary if x["cohort"] == "e220_hw_trace" and x["scenario"] == "ALL_CONGESTION" and x["policy"] == p) for p in pols]
     aois = [next(float(x["mean_aoi_s"]) for x in summary if x["cohort"] == "e220_hw_trace" and x["scenario"] == "ALL_CONGESTION" and x["policy"] == p) for p in pols]
     cols = ["#777777", "#228833", "#aa3377", "#cc3311", "#004488"]
@@ -320,7 +320,7 @@ def build_graphical_abstract(summary: list[dict], effects: list[dict]) -> None:
     # Panel 3: Real 54-Mote Intel Berkeley + H3
     ax3 = fig.add_axes([0.72, 0.17, 0.26, 0.61])
     pols3 = ["fifo", "fud", "maxweight", "edf", "fud_ada"]
-    lbls3 = ["FIFO", "FUD\n(v1)", "MaxWt", "EDF", "FUD-Ada\n(Ours)"]
+    lbls3 = ["FIFO", "FUD-\nQuad", "MaxWt", "EDF", "FUD-Ada\n(Ours)"]
     m3 = [next(float(x["event_deadline_miss"]) * 100 for x in summary if x["cohort"] == "intel_real_traffic" and x["scenario"] == "ALL_POOLED" and x["policy"] == p) for p in pols3]
     wj3 = [next(float(x["jain_weighted_service_share"]) * 100 for x in summary if x["cohort"] == "intel_real_traffic" and x["scenario"] == "ALL_POOLED" and x["policy"] == p) for p in pols3]
     x3 = np.arange(len(pols3)); w = 0.36
@@ -335,7 +335,7 @@ def build_graphical_abstract(summary: list[dict], effects: list[dict]) -> None:
     ax3.set_title("3. Real 54-Mote Intel Traffic × E220", fontsize=10.0, fontweight="bold", color="#004488", pad=8)
     ax3.spines["top"].set_visible(False); ax3.spines["right"].set_visible(False); ax3.grid(axis="y", alpha=0.22)
     ax3.legend(fontsize=7.3, loc="upper right", frameon=True)
-    ax3.text(0.5, -0.23, "Strict 4-metric Pareto win vs EDF & MaxWt; H3 Debt solved (+0.059 Jain)",
+    ax3.text(0.5, -0.23, "Strict 4-metric Pareto win vs EDF & MaxWt; Debt ablation solved (+0.059 Jain)",
              transform=ax3.transAxes, ha="center", fontsize=7.6, color="#333333", style="italic")
 
     out_p = Path(__file__).resolve().parent
