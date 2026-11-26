@@ -202,16 +202,19 @@ def build_fig04_intel_and_h3(summary: list[dict], effects: list[dict]) -> None:
            _get_eff("e220_hw_trace", "ALL_CONGESTION", "jain_weighted_service_share"),
            _get_eff("intel_real_traffic", "ALL_POOLED", "jain_weighted_service_share")]
     xb = np.arange(len(cats))
-    b1 = axes[1].bar(xb - 0.18, raw_d, width=0.34, color="#004488", edgecolor="#222222", lw=0.5, label=r"$\Delta$ Raw Jain ↑")
-    b2 = axes[1].bar(xb + 0.18, w_d, width=0.34, color="#228833", edgecolor="#222222", lw=0.5, hatch="///", alpha=0.88, label=r"$\Delta$ Weighted Jain ↑")
+    b1 = axes[1].bar(xb - 0.175, raw_d, width=0.31, color="#004488", edgecolor="#222222", lw=0.5, label=r"$\Delta$ Raw Jain ↑")
+    b2 = axes[1].bar(xb + 0.175, w_d, width=0.31, color="#228833", edgecolor="#222222", lw=0.5, hatch="///", alpha=0.88, label=r"$\Delta$ Weighted Jain ↑")
     for idx_b, bars in enumerate((b1, b2)):
         for i_bar, bar in enumerate(bars):
             h = bar.get_height()
-            x_off = -0.04 if (i_bar == 0 and idx_b == 0) else (0.04 if (i_bar == 0 and idx_b == 1) else 0.0)
-            axes[1].text(bar.get_x() + bar.get_width()/2 + x_off, h + 0.0028, f"+{h:.3f}", ha="center", va="bottom", fontsize=5.7)
+            if i_bar == 0:
+                x_off = -0.055 if idx_b == 0 else 0.055
+            else:
+                x_off = -0.025 if idx_b == 0 else 0.025
+            axes[1].text(bar.get_x() + bar.get_width()/2 + x_off, h + 0.0028, f"{h:.3f}", ha="center", va="bottom", fontsize=5.6)
     axes[1].axhline(0.0, color="#222222", lw=0.7)
     axes[1].set(title="(b) Debt Fairness Gain (All $p_{\\mathrm{Holm}}<0.04$)", xticks=xb, xticklabels=cats,
-                ylabel="Paired Jain Gain (Full − NoDebt)", ylim=(-0.005, 0.116))
+                ylabel="Paired Jain Gain (Full − NoDebt)", ylim=(-0.005, 0.118))
     axes[1].grid(axis="y")
     axes[1].legend(fontsize=6.4, loc="upper center", ncol=2, frameon=True, framealpha=0.94, borderpad=0.25, columnspacing=0.8)
 
@@ -238,9 +241,10 @@ def build_fig05_c11() -> None:
     axes[0].plot(scales, _esp_ms("fifo"), "*:", color="#666666", lw=1.1, ms=4.4, label="FIFO")
     ada_ms = _esp_ms("fud_ada")
     for n, va in zip(scales, ada_ms):
-        x_txt = n + (4.2 if n == 8 else (-4.5 if n == 96 else 0.0))
-        y_off = 0.14 if n != 96 else 0.13
-        axes[0].text(x_txt, va + y_off, f"{va:.2f} ms", ha="center", va="bottom", fontsize=6.4, color="#004488", fontweight="bold")
+        x_txt = n + (1.2 if n == 8 else (-5.0 if n == 96 else 0.0))
+        y_off = 0.24 if n == 8 else (0.14 if n != 96 else 0.13)
+        axes[0].text(x_txt, va + y_off, f"{va:.2f} ms", ha="center", va="bottom", fontsize=6.4, color="#004488", fontweight="bold",
+                     bbox=dict(fc="white", ec="none", alpha=0.78, pad=0.3))
     axes[0].set(title="(a) Real ESP32-S3 (240 MHz) Per-Slot Latency ($O(N)$)", xlabel="Active Concurrent Flows ($N$)",
                 ylabel="Measured On-Chip Latency (ms)", xticks=scales, xlim=(1, 105), ylim=(0, 3.45))
     axes[0].text(0.97, 0.54, "<2.91% of 100 ms slot\n(SW FP64, 0 B heap delta)", transform=axes[0].transAxes,

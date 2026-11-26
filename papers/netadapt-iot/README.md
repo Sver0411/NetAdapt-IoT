@@ -4,7 +4,7 @@ Standalone, publication-ready 8-page IEEE double-column manuscript (`\documentcl
 
 ## Contents
 
-- `manuscript.tex` — Complete IEEE double-column LaTeX source (TikZ architecture diagram, 4 native `7.16 in` vector PDF figures, 4 `booktabs` tables, 17 verified BibTeX references).
+- `manuscript.tex` — Complete IEEE double-column LaTeX source (TikZ architecture diagram, 4 native `7.16 in` vector PDF figures, 4 `booktabs` tables, 30 verified BibTeX references).
 - `build_figures.py` — Deterministic figure generator emitting B&W-print-safe IEEE vector PDFs (`figures/`) and Graphical Abstract directly from saved CSV/JSON outputs.
 - `references.bib` — Verified peer-reviewed BibTeX entries (`IEEEtran` bibliography style).
 - `manuscript.pdf` — Compiled 8-page vector PDF (`tectonic manuscript.tex`).
